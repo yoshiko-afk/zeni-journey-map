@@ -275,6 +275,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .cl-author{font-weight:600;color:#64748b}
 #cl-empty{text-align:center;padding:48px 24px;font-size:13px;color:#94a3b8}
 
+/* CHANGELOG SNAPSHOT & CONTEXT */
+.cl-snapshot{margin:6px 0;border:1px solid rgba(0,0,0,.07);border-radius:6px;overflow:hidden}
+.cl-snap-row{display:flex;gap:8px;padding:4px 8px;border-bottom:1px solid rgba(0,0,0,.05);font-size:11px;line-height:1.4}
+.cl-snap-row:last-child{border-bottom:none}
+.cl-snap-lbl{font-weight:600;color:#94a3b8;width:76px;flex-shrink:0}
+.cl-snap-val{color:#334155;flex:1;word-break:break-word}
+.cl-ctx{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:4px 0 6px;font-size:11px}
+.cl-ctx-week{color:#475569;font-weight:600}
+.cl-ctx-day{color:#94a3b8}
+.cl-ctx-tags{display:flex;flex-wrap:wrap;gap:3px}
+
 /* LIVE INDICATOR */
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -865,12 +876,14 @@ function attachEditListeners(){
         update.lastEditBy=currentUser||'Anonymous';
         if(db){
           update.lastEditAt=firebase.firestore.FieldValue.serverTimestamp();
-          /* Find touch title for changelog */
+          /* Find touch for changelog */
           var t=allTouches.find(function(x){return x.id===id;});
           var touchTitle=t?t.title:'(unknown touch)';
           var touchNum=t?('T'+t._num+': '):'';
+          var wgEdit=t?weekGroups.find(function(w){return t.day>=w.min&&t.day<=w.max;}):null;
+          var touchCtx=t?{num:t._num,day:t.day,week:wgEdit?wgEdit.label:'',title:t.title,type:t.type,trigger:t.trigger,tags:t.tags,conditional:!!t.conditional}:null;
           db.collection('touches').doc(id).update(update).then(function(){
-            logChange({type:'edit',touchId:id,touchLabel:touchNum+touchTitle.substring(0,50),field:field,oldValue:originalVal,newValue:val});
+            logChange({type:'edit',touchId:id,touchLabel:touchNum+touchTitle.substring(0,60),field:field,oldValue:originalVal,newValue:val,touchContext:touchCtx});
             el.dataset.original=rawVal; /* update baseline */
           }).catch(function(e){console.warn('Edit save failed:',e);});
         }
@@ -888,13 +901,15 @@ function deleteTouch(id){
   if(!confirm('Remove this touch? It will be soft-deleted and removed from the journey.'))return;
   if(!db){alert('Firebase not connected — cannot delete in offline mode.');return;}
   var t=allTouches.find(function(x){return x.id===id;});
-  var touchLabel=t?('T'+t._num+': '+t.title.substring(0,50)):'(unknown)';
+  var touchLabel=t?('T'+t._num+': '+t.title.substring(0,60)):'(unknown)';
+  var wgDel=t?weekGroups.find(function(w){return t.day>=w.min&&t.day<=w.max;}):null;
+  var snapshot=t?{num:t._num,day:t.day,week:wgDel?wgDel.label:'',title:t.title,type:t.type,trigger:t.trigger,tags:t.tags,conditional:!!t.conditional}:null;
   db.collection('touches').doc(id).update({
     deleted:true,
     deletedBy:currentUser||'Anonymous',
     deletedAt:firebase.firestore.FieldValue.serverTimestamp()
   }).then(function(){
-    logChange({type:'delete',touchId:id,touchLabel:touchLabel});
+    logChange({type:'delete',touchId:id,touchLabel:touchLabel,snapshot:snapshot});
   }).catch(function(e){alert('Delete failed: '+e.message);});
 }
 
@@ -945,7 +960,8 @@ async function submitAddTouch(){
   if(!db){alert('Firebase not connected — cannot add touches in offline mode.');return;}
   try{
     await db.collection('touches').doc(newId).set(doc);
-    logChange({type:'add',touchId:newId,touchLabel:'Day '+day+': '+title.substring(0,50),field:null,oldValue:null,newValue:null});
+    var wgAdd=weekGroups.find(function(w){return day>=w.min&&day<=w.max;});
+    logChange({type:'add',touchId:newId,touchLabel:'Day '+day+': '+title.substring(0,60),snapshot:{day:day,week:wgAdd?wgAdd.label:'',title:title,type:type,trigger:trigger,tags:doc.tags,conditional:cond}});
     closeAddModal();
   }catch(e){alert('Could not add touch: '+e.message);}
 }
@@ -1078,14 +1094,46 @@ function renderChangelog(entries){
     var typeLabel=e.type==='edit'?'Field edited':e.type==='add'?'Touch added':'Touch removed';
     var typeClass='cl-'+e.type;
     var changeHtml='';
+
     if(e.type==='edit'){
       var fLabel=fieldLabels[e.field]||e.field;
-      changeHtml='<div class="cl-change"><strong>'+escHtml(fLabel)+'</strong><br>'
+      var ctx=e.touchContext;
+      var ctxHtml='';
+      if(ctx){
+        var tagHtml=ctx.tags&&ctx.tags.length?ctx.tags.map(function(tg){return'<span class="tag '+escHtml(tg.cls)+'">'+escHtml(tg.lbl)+'</span>';}).join(' '):'';
+        ctxHtml='<div class="cl-ctx">'
+          +(ctx.week?'<span class="cl-ctx-week">'+escHtml(ctx.week)+'</span>':'')
+          +'<span class="cl-ctx-day">Day '+escHtml(String(ctx.day))+'</span>'
+          +(tagHtml?'<span class="cl-ctx-tags">'+tagHtml+'</span>':'')
+          +(ctx.conditional?'<span class="tag t-cond">CONDITIONAL</span>':'')
+          +'</div>';
+        if(ctx.type)ctxHtml+='<div class="cl-snap-row"><span class="cl-snap-lbl">Description</span><span class="cl-snap-val">'+escHtml(ctx.type)+'</span></div>';
+        if(ctx.trigger)ctxHtml+='<div class="cl-snap-row"><span class="cl-snap-lbl">Trigger</span><span class="cl-snap-val">'+escHtml(ctx.trigger)+'</span></div>';
+      }
+      changeHtml=ctxHtml
+        +'<div class="cl-change"><strong>'+escHtml(fLabel)+'</strong><br>'
         +'<span class="cl-old">'+escHtml(e.oldValue||'(empty)')+'</span>'
         +'<span class="cl-arrow">→</span>'
         +'<span class="cl-new">'+escHtml(e.newValue||'(empty)')+'</span>'
         +'</div>';
     }
+
+    if(e.type==='delete'||e.type==='add'){
+      var s=e.snapshot;
+      if(s){
+        var sTagHtml=s.tags&&s.tags.length?s.tags.map(function(tg){return'<span class="tag '+escHtml(tg.cls)+'">'+escHtml(tg.lbl)+'</span>';}).join(' '):'—';
+        changeHtml='<div class="cl-snapshot">'
+          +'<div class="cl-snap-row"><span class="cl-snap-lbl">Week</span><span class="cl-snap-val">'+escHtml(s.week||'—')+'</span></div>'
+          +'<div class="cl-snap-row"><span class="cl-snap-lbl">Day</span><span class="cl-snap-val">'+escHtml(String(s.day||'—'))+'</span></div>'
+          +'<div class="cl-snap-row"><span class="cl-snap-lbl">Title</span><span class="cl-snap-val">'+escHtml(s.title||'—')+'</span></div>'
+          +(s.type?'<div class="cl-snap-row"><span class="cl-snap-lbl">Description</span><span class="cl-snap-val">'+escHtml(s.type)+'</span></div>':'')
+          +(s.trigger?'<div class="cl-snap-row"><span class="cl-snap-lbl">Trigger</span><span class="cl-snap-val">'+escHtml(s.trigger)+'</span></div>':'')
+          +'<div class="cl-snap-row"><span class="cl-snap-lbl">Series</span><span class="cl-snap-val">'+sTagHtml+'</span></div>'
+          +(s.conditional?'<div class="cl-snap-row"><span class="cl-snap-lbl">Conditional</span><span class="cl-snap-val">Yes</span></div>':'')
+          +'</div>';
+      }
+    }
+
     return '<div class="cl-item '+typeClass+'">'
       +'<div class="cl-type">'+typeLabel+'</div>'
       +'<div class="cl-touch">'+escHtml(e.touchLabel||'')+'</div>'
