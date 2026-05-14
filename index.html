@@ -59,7 +59,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .em-row{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.05);position:relative}
 .em-row:last-child{border-bottom:none}
 .em-row:hover{background:#fafafa}
-.em-row:hover .row-actions{opacity:1}
 .em-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px}
 .em-day{font-size:11px;font-weight:500;color:#94a3b8;width:42px;flex-shrink:0;padding-top:4px}
 .em-main{flex:1;min-width:0}
@@ -67,7 +66,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .em-type{font-size:11px;color:#64748b;font-style:italic;margin-bottom:4px}
 .em-trigger{font-size:10px;color:#94a3b8;line-height:1.4}
 .em-trigger::before{content:"Trigger: ";font-weight:600;color:#b0bec5}
-.em-tags{display:flex;gap:4px;flex-direction:column;align-items:flex-end;flex-shrink:0;min-width:90px;padding-top:2px}
+.em-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;min-width:100px;padding-top:2px}
+.em-tags{display:flex;gap:4px;flex-direction:column;align-items:flex-end}
 .tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;text-align:center;white-space:nowrap;letter-spacing:.3px}
 .t-aicfo{background:#fce7f3;color:#be185d}
 .t-aiacc{background:#ede9fe;color:#6d28d9}
@@ -118,10 +118,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .scd{font-size:11px;color:#0c4a6e;line-height:1.45}
 .scm{font-size:10px;color:#7dd3fc;margin-top:5px;font-style:italic}
 
-/* SAVE BUTTON */
-#save-wrap{position:fixed;top:16px;right:16px;z-index:999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-#save-toggle{background:rgba(255,255,255,0.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#64748b;border:1px solid rgba(0,0,0,.12);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:background .15s,color .15s}
+/* TOP BAR RIGHT — username + activity in one row */
+#top-bar-right{position:fixed;top:16px;right:16px;z-index:999;display:flex;align-items:center;gap:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#user-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border:1px solid rgba(0,0,0,.1);border-radius:8px;padding:5px 10px;font-size:11px;color:#475569;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08);white-space:nowrap}
+#user-badge:hover{background:#fff;color:#0f172a}
+.ub-dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;flex-shrink:0}
+#save-wrap{position:relative}
+#save-toggle{background:rgba(255,255,255,0.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#64748b;border:1px solid rgba(0,0,0,.12);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
 #save-toggle:hover{background:#fff;color:#0f172a}
+#save-toggle.has-unresolved{background:#fef3c7;color:#d97706;border-color:#fcd34d}
 #save-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:9px;box-shadow:0 4px 16px rgba(0,0,0,.12);overflow:hidden;min-width:160px}
 #save-menu.open{display:block}
 .sm-item{display:flex;align-items:center;gap:8px;padding:9px 13px;font-size:11px;font-weight:500;color:#334155;cursor:pointer;transition:background .12s;white-space:nowrap}
@@ -129,17 +134,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .sm-sep{height:1px;background:rgba(0,0,0,.07);margin:0}
 #save-toast{position:fixed;top:52px;right:16px;background:#22c55e;color:#fff;font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 
-/* USER BADGE */
-#user-badge{position:fixed;top:16px;right:108px;z-index:999;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);backdrop-filter:blur(6px);border:1px solid rgba(0,0,0,.1);border-radius:8px;padding:5px 10px;font-size:11px;color:#475569;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-#user-badge:hover{background:#fff;color:#0f172a}
-.ub-dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;flex-shrink:0}
-
 /* ROW ACTIONS */
-.row-actions{display:flex;gap:4px;align-items:center;opacity:0;transition:opacity .15s;flex-shrink:0;padding-top:2px}
+.em-row-acts{display:flex;gap:4px;align-items:center;justify-content:flex-end;margin-top:2px;opacity:0.35;transition:opacity .15s}
+.em-row:hover .em-row-acts{opacity:1}
 .cmt-btn,.del-btn{width:22px;height:22px;border-radius:5px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;transition:background .12s,color .12s}
 .cmt-btn:hover{background:#ede9fe;color:#7c3aed}
 .del-btn:hover{background:#fee2e2;color:#dc2626}
-.cmt-count{font-size:9px;font-weight:700;color:#7c3aed;margin-left:-2px}
+.cmt-btn.has-unresolved{background:#fef3c7;color:#d97706;border:1px solid #fcd34d;opacity:1!important}
 
 /* WEEK COMMENT BTN */
 .week-comment-btn{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;border:1px solid rgba(0,0,0,.1);background:#fff;font-size:10px;color:#94a3b8;cursor:pointer;transition:background .12s,color .12s;flex-shrink:0;margin-left:4px}
@@ -218,6 +219,61 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .btn-cancel:hover{background:#e2e8f0}
 .btn-add{flex:2;background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:600;cursor:pointer}
 .btn-add:hover{background:#6d28d9}
+
+/* UNRESOLVED INDICATORS */
+.cmt-btn.has-unresolved{background:#fef3c7;color:#d97706;border:1px solid #fcd34d;opacity:1!important}
+.week-comment-btn.has-unresolved{background:#fef3c7;color:#d97706;border-color:#fcd34d}
+.cmt-ind{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:8px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;padding:0 4px;margin-left:2px;line-height:1}
+
+/* ALL COMMENTS PANEL */
+#allcmt-panel{position:fixed;top:0;right:-520px;width:480px;height:100vh;background:#fff;border-left:1px solid rgba(0,0,0,.1);box-shadow:-4px 0 24px rgba(0,0,0,.08);z-index:1001;display:flex;flex-direction:column;transition:right .25s ease}
+#allcmt-panel.open{right:0}
+#allcmt-hdr{padding:16px 18px;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:10px}
+#allcmt-hdr h2{font-size:14px;font-weight:700;color:#0f172a;flex:1}
+#allcmt-close{width:28px;height:28px;border:none;background:none;cursor:pointer;border-radius:6px;color:#94a3b8;font-size:16px;display:flex;align-items:center;justify-content:center}
+#allcmt-close:hover{background:#f1f5f9;color:#0f172a}
+#allcmt-filters{padding:10px 18px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;gap:8px;align-items:center}
+.acf-btn{font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;font-weight:500;color:#475569;transition:all .12s}
+.acf-btn.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
+#allcmt-body{flex:1;overflow-y:auto;padding:12px 18px}
+.ac-author-group{margin-bottom:20px}
+.ac-author-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid rgba(0,0,0,.07)}
+.ac-author-avatar{width:26px;height:26px;border-radius:50%;background:#a78bfa;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ac-author-name{font-size:13px;font-weight:700;color:#0f172a}
+.ac-author-count{font-size:10px;color:#94a3b8;margin-left:auto}
+.ac-item{background:#f8fafc;border-radius:8px;padding:9px 12px;margin-bottom:6px;border-left:3px solid #e2e8f0;cursor:pointer;transition:background .12s}
+.ac-item:hover{background:#f1f5f9}
+.ac-item.unresolved{border-left-color:#f59e0b}
+.ac-item.resolved{border-left-color:#22c55e;opacity:.7}
+.ac-location{font-size:10px;font-weight:600;color:#94a3b8;margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px}
+.ac-text{font-size:12px;color:#334155;line-height:1.45;margin-bottom:4px}
+.ac-meta{display:flex;align-items:center;gap:6px;font-size:10px;color:#94a3b8}
+.ac-status-open{color:#d97706;font-weight:600}
+.ac-status-done{color:#16a34a;font-weight:600}
+#allcmt-empty{text-align:center;padding:48px 24px;font-size:13px;color:#94a3b8}
+
+
+/* CHANGELOG PANEL */
+#cl-panel{position:fixed;top:0;left:-520px;width:480px;height:100vh;background:#fff;border-right:1px solid rgba(0,0,0,.1);box-shadow:4px 0 24px rgba(0,0,0,.08);z-index:1001;display:flex;flex-direction:column;transition:left .25s ease}
+#cl-panel.open{left:0}
+#cl-hdr{padding:16px 18px;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:10px}
+#cl-hdr h2{font-size:14px;font-weight:700;color:#0f172a;flex:1}
+#cl-close{width:28px;height:28px;border:none;background:none;cursor:pointer;border-radius:6px;color:#94a3b8;font-size:16px;display:flex;align-items:center;justify-content:center}
+#cl-close:hover{background:#f1f5f9;color:#0f172a}
+#cl-body{flex:1;overflow-y:auto;padding:12px 18px;display:flex;flex-direction:column;gap:8px}
+.cl-item{border-radius:8px;padding:10px 12px;border:1px solid rgba(0,0,0,.07)}
+.cl-item.cl-edit{border-left:3px solid #a78bfa;background:#faf5ff}
+.cl-item.cl-add{border-left:3px solid #22c55e;background:#f0fdf4}
+.cl-item.cl-delete{border-left:3px solid #ef4444;background:#fef2f2}
+.cl-type{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;color:#94a3b8}
+.cl-touch{font-size:11px;font-weight:600;color:#1e293b;margin-bottom:4px}
+.cl-change{font-size:11px;color:#475569;line-height:1.5}
+.cl-old{color:#ef4444;text-decoration:line-through;word-break:break-word}
+.cl-new{color:#16a34a;word-break:break-word}
+.cl-arrow{color:#94a3b8;margin:0 4px}
+.cl-meta{font-size:10px;color:#94a3b8;margin-top:5px;display:flex;gap:8px}
+.cl-author{font-weight:600;color:#64748b}
+#cl-empty{text-align:center;padding:48px 24px;font-size:13px;color:#94a3b8}
 
 /* LIVE INDICATOR */
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite}
@@ -305,25 +361,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
   </div>
 </div>
 
-<!-- USER BADGE -->
-<div id="user-badge" onclick="changeName()">
-  <div class="ub-dot"></div>
-  <span id="badge-name">You</span>
+<!-- CHANGELOG PANEL -->
+<div id="cl-panel">
+  <div id="cl-hdr">
+    <h2>📋 Changelog</h2>
+    <button id="cl-close" onclick="closeChangelog()">✕</button>
+  </div>
+  <div id="cl-body"><div id="cl-empty">No changes logged yet.</div></div>
 </div>
 
-<!-- EXPORT BUTTON -->
-<div id="save-wrap">
-  <button id="save-toggle" onclick="toggleSaveMenu(event)">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;opacity:.7"><path d="M13 11v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2"/><polyline points="10 7 8 9 6 7"/><line x1="8" y1="2" x2="8" y2="9"/></svg>
-    Export ▾
-  </button>
-  <div id="save-menu">
-    <div class="sm-item" onclick="saveSnapshot();closeSaveMenu()">Save as HTML</div>
-    <div class="sm-sep"></div>
-    <div class="sm-item" onclick="window.print();closeSaveMenu()">Export full page (PDF)</div>
+
+<div id="top-bar-right">
+  <!-- USER BADGE -->
+  <div id="user-badge" onclick="changeName()">
+    <div class="ub-dot"></div>
+    <span id="badge-name">You</span>
+  </div>
+  <!-- ACTIVITY DROPDOWN -->
+  <div id="save-wrap">
+    <button id="save-toggle" onclick="toggleActivityMenu(event)">
+      Activity ▾ <span id="global-unresolved-badge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:2px"></span>
+    </button>
+    <div id="save-menu">
+      <div class="sm-item" onclick="openAllComments();closeActivityMenu()">💬 All Comments</div>
+      <div class="sm-sep"></div>
+      <div class="sm-item" onclick="openChangelog();closeActivityMenu()">📋 Changelog</div>
+    </div>
   </div>
 </div>
 <div id="save-toast">✓ Saved — check your Downloads</div>
+
+<!-- ALL COMMENTS PANEL -->
+<div id="allcmt-panel">
+  <div id="allcmt-hdr">
+    <h2>💬 All Comments</h2>
+    <button id="allcmt-close" onclick="closeAllComments()">✕</button>
+  </div>
+  <div id="allcmt-filters">
+    <span style="font-size:11px;color:#64748b;margin-right:4px">Show:</span>
+    <button class="acf-btn active" id="f-all" onclick="setFilter('all')">All</button>
+    <button class="acf-btn" id="f-open" onclick="setFilter('open')">Open</button>
+    <button class="acf-btn" id="f-resolved" onclick="setFilter('resolved')">Resolved</button>
+  </div>
+  <div id="allcmt-body"><div id="allcmt-empty">No comments yet.</div></div>
+</div>
 
 <!-- HEADER -->
 <div class="hdr">
@@ -369,7 +450,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 
 <!-- POST-ACTIVATION ONBOARDING -->
 <div class="sec">
-  <div class="sec-hdr"><span class="stitle">Post-activation onboarding series <span style="font-size:11px;font-weight:400;color:#94a3b8">Triggered when customer activates each product</span></span><button class="week-comment-btn" onclick="openCmt('section-postactivation','Post-activation onboarding series')" style="font-size:11px;padding:4px 10px">💬 Comment on section</button></div>
+  <div class="sec-hdr"><span class="stitle">Post-activation onboarding series <span style="font-size:11px;font-weight:400;color:#94a3b8">Triggered when customer activates each product</span></span><button class="week-comment-btn" id="cind-section-postactivation" onclick="openCmt('section-postactivation','Post-activation onboarding series')" style="font-size:11px;padding:4px 10px">💬 Comment on section</button></div>
   <div class="ons-g">
     <div class="oc"><div class="oh" style="background:#4d79f5">Checking + Debit<span style="opacity:.8;font-size:10px;font-weight:400">4</span></div><div class="ob"><div class="oc-cnt">HubSpot · on activation</div><div class="oe">Welcome + account walkthrough</div><div class="oe">Set up auto transfer</div><div class="oe">Issue your debit card</div><div class="oe">Move money: ACH + wire guide</div></div></div>
     <div class="oc"><div class="oh" style="background:#3aabe0">Bill Pay<span style="opacity:.8;font-size:10px;font-weight:400">5</span></div><div class="ob"><div class="oc-cnt">HubSpot · on activation</div><div class="oe">Welcome + Bill Pay overview</div><div class="oe">Set up approval rules</div><div class="oe">Schedule recurring payments</div><div class="oe">Bulk vendor upload</div><div class="oe">Same-day ACH guide</div></div></div>
@@ -381,7 +462,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 
 <!-- M4-12 -->
 <div class="sec">
-  <div class="sec-hdr"><span class="stitle">Months 4–12 — slow drip + lifecycle</span><button class="week-comment-btn" onclick="openCmt('section-m4-12','Months 4–12 slow drip + lifecycle')" style="font-size:11px;padding:4px 10px">💬 Comment on section</button></div>
+  <div class="sec-hdr"><span class="stitle">Months 4–12 — slow drip + lifecycle</span><button class="week-comment-btn" id="cind-section-m4-12" onclick="openCmt('section-m4-12','Months 4–12 slow drip + lifecycle')" style="font-size:11px;padding:4px 10px">💬 Comment on section</button></div>
   <div class="tbl-wrap">
   <table class="mt"><thead><tr>
     <th class="ml">Email type</th><th>M4</th><th>M5</th><th>M6</th><th>M7</th><th>M8</th><th>M9</th><th>M10</th><th>M11</th><th>M12</th>
@@ -422,7 +503,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 
 <!-- SYSTEM EMAILS -->
 <div class="sec">
-  <div class="sec-hdr"><span class="stitle">System emails <span style="font-size:11px;font-weight:400;color:#94a3b8">Always-on · Mandrill/SendWithUs · not in HubSpot unsubscribe flow</span></span><button class="week-comment-btn" onclick="openCmt('section-system','System emails')" style="font-size:11px;padding:4px 10px">💬 Comment on section</button></div>
+  <div class="sec-hdr"><span class="stitle">System emails <span style="font-size:11px;font-weight:400;color:#94a3b8">Always-on · Mandrill/SendWithUs · not in HubSpot unsubscribe flow</span></span><button class="week-comment-btn" id="cind-section-system" onclick="openCmt('section-system','System emails')" style="font-size:11px;padding:4px 10px">💬 Comment on section</button></div>
   <div class="sys-g">
     <div class="sc"><div class="sct">AI Finance Team Welcome (T1)</div><div class="scd">Introduces Zeni's AI CFO and AI Accountant — who they are, what they're already doing, and what to expect in the first 90 days. Includes login confirmation, quick-start checklist, and a teaser of the first AI insight.</div><div class="scm">Day 1 · fires on first dashboard login · all customers</div></div>
     <div class="sc"><div class="sct">AI CFO month-end insight</div><div class="scd">Automated insight digest: runway, burn rate, cash position anomalies, top expense categories. Sent in the first 7 days of the following month, starting M1.</div><div class="scm">Monthly · first 7 days of following month · Mandrill · starts W4</div></div>
@@ -432,10 +513,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 </div>
 
 <script>
-/* ─── Firebase ─── */
-const firebaseConfig={apiKey:"AIzaSyCNAeUZzODk1wQwmaVgerWOlEirVx7OrGo",authDomain:"zeni-journey.firebaseapp.com",projectId:"zeni-journey",storageBucket:"zeni-journey.firebasestorage.app",messagingSenderId:"821260249677",appId:"1:821260249677:web:f27c4226c94c7f3da44a04"};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
+/* ─── Helpers (no dependencies) ─── */
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function initials(name){return (name||'?').split(' ').map(function(p){return p[0]||'';}).join('').substring(0,2).toUpperCase();}
+function timeAgo(d){var s=Math.floor((Date.now()-d.getTime())/1000);if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function dateStamp(){var t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');}
+function showToast(msg){var t=document.getElementById('save-toast');if(msg)t.textContent=msg;t.style.opacity='1';setTimeout(function(){t.style.opacity='0';},2500);}
+
+/* ─── Firebase (safe init — won't crash page if CDN unavailable) ─── */
+var db=null;
+try{
+  var firebaseConfig={apiKey:"AIzaSyCNAeUZzODk1wQwmaVgerWOlEirVx7OrGo",authDomain:"zeni-journey.firebaseapp.com",projectId:"zeni-journey",storageBucket:"zeni-journey.firebasestorage.app",messagingSenderId:"821260249677",appId:"1:821260249677:web:f27c4226c94c7f3da44a04"};
+  if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  else if(typeof firebase!=='undefined'&&firebase.apps.length){}
+  db=firebase.firestore();
+}catch(e){
+  console.warn('Firebase init failed — running in offline/preview mode:',e);
+  document.getElementById('live-bar').innerHTML='<span style="color:#f59e0b">⚠ Firebase offline — showing preview data. Deploy to Vercel for live collaboration.</span>';
+}
 
 /* ─── User ─── */
 var currentUser=localStorage.getItem('zeni_username')||'';
@@ -639,6 +734,7 @@ var SEED=[
 
 /* ─── Seed Firestore on first load ─── */
 async function seedIfEmpty(){
+  if(!db)return;
   try{
     var snap=await db.collection('touches').limit(1).get();
     if(!snap.empty)return;
@@ -681,7 +777,7 @@ function renderWeeks(touches){
     html+='<span class="wk-chev" style="transform:'+(isOpen?'':'rotate(-90deg)')+'">▼</span>';
     html+='<span class="wk-title">'+wg.label+'</span>';
     html+=pills;
-    html+='<button class="week-comment-btn" onclick="event.stopPropagation();openCmt(\'week-'+wi+'\',\''+escHtml(wg.label)+'\')" title="Comment on this week">💬</button>';
+    html+='<button class="week-comment-btn" id="cind-week-'+wi+'" onclick="event.stopPropagation();openCmt(\'week-'+wi+'\',\''+escHtml(wg.label)+'\')" title="Comment on this week">💬</button>';
     html+='<span class="wk-count">'+total+' email'+(total!==1?'s':'')+'</span>';
     html+='</div>';
     html+='<div class="week-body" style="display:'+(isOpen?'block':'none')+'">';
@@ -695,6 +791,8 @@ function renderWeeks(touches){
   attachEditListeners();
   /* Update gantt */
   updateGanttFromTouches(active);
+  /* Re-apply comment indicators after DOM rebuilt */
+  if(allCommentsData.length)applyIndicators();
 }
 
 function buildPills(wTouches){
@@ -729,10 +827,12 @@ function renderTouchRow(t){
     +'<div class="em-type" contenteditable="true" data-field="type" data-id="'+t.id+'">'+escHtml(t.type)+'</div>'
     +'<div class="em-trigger" contenteditable="true" data-field="trigger" data-id="'+t.id+'">'+escHtml(t.trigger)+'</div>'
     +'</div>'
+    +'<div class="em-right">'
     +'<div class="em-tags">'+tagHtml+'</div>'
-    +'<div class="row-actions">'
-    +'<button class="cmt-btn" onclick="openCmt(\'touch-'+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="Comments">💬</button>'
+    +'<div class="em-row-acts">'
+    +'<button class="cmt-btn" id="cind-touch-'+t.id+'" onclick="openCmt(\'touch-'+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="Comments">💬</button>'
     +'<button class="del-btn" onclick="deleteTouch(\''+t.id+'\')" title="Remove touch">🗑</button>'
+    +'</div>'
     +'</div>'
     +'</div>';
 }
@@ -740,23 +840,45 @@ function renderTouchRow(t){
 /* ─── Edit sync ─── */
 function attachEditListeners(){
   document.querySelectorAll('[contenteditable][data-id]').forEach(function(el){
+    /* Capture original value when user focuses the field */
+    el.addEventListener('focus',function(){
+      if(!el.dataset.original)el.dataset.original=el.innerText.trim();
+    });
     el.addEventListener('input',function(){
       var id=el.getAttribute('data-id');
       var field=el.getAttribute('data-field');
       clearTimeout(editTimers[id+field]);
       editTimers[id+field]=setTimeout(function(){
-        var val=el.innerText.replace(/^Day\s*/i,'').trim();
+        var rawVal=el.innerText.trim();
+        var val=field==='day'?rawVal.replace(/^Day\s*/i,'').trim():rawVal;
+        var originalVal=(el.dataset.original||'').replace(/^Day\s*/i,'').trim();
+        /* Skip if nothing actually changed */
+        if(val===originalVal)return;
         var update={};
         if(field==='day'){
           var n=parseInt(val);
           if(!isNaN(n))update.day=n;
+          else return;
         } else {
-          update[field]=el.innerText.trim();
+          update[field]=rawVal;
         }
         update.lastEditBy=currentUser||'Anonymous';
-        update.lastEditAt=firebase.firestore.FieldValue.serverTimestamp();
-        db.collection('touches').doc(id).update(update).catch(function(e){console.warn('Edit save failed:',e);});
+        if(db){
+          update.lastEditAt=firebase.firestore.FieldValue.serverTimestamp();
+          /* Find touch title for changelog */
+          var t=allTouches.find(function(x){return x.id===id;});
+          var touchTitle=t?t.title:'(unknown touch)';
+          var touchNum=t?('T'+t._num+': '):'';
+          db.collection('touches').doc(id).update(update).then(function(){
+            logChange({type:'edit',touchId:id,touchLabel:touchNum+touchTitle.substring(0,50),field:field,oldValue:originalVal,newValue:val});
+            el.dataset.original=rawVal; /* update baseline */
+          }).catch(function(e){console.warn('Edit save failed:',e);});
+        }
       },800);
+    });
+    /* Clear original on blur so next focus re-captures */
+    el.addEventListener('blur',function(){
+      delete el.dataset.original;
     });
   });
 }
@@ -764,10 +886,15 @@ function attachEditListeners(){
 /* ─── Delete touch ─── */
 function deleteTouch(id){
   if(!confirm('Remove this touch? It will be soft-deleted and removed from the journey.'))return;
+  if(!db){alert('Firebase not connected — cannot delete in offline mode.');return;}
+  var t=allTouches.find(function(x){return x.id===id;});
+  var touchLabel=t?('T'+t._num+': '+t.title.substring(0,50)):'(unknown)';
   db.collection('touches').doc(id).update({
     deleted:true,
     deletedBy:currentUser||'Anonymous',
     deletedAt:firebase.firestore.FieldValue.serverTimestamp()
+  }).then(function(){
+    logChange({type:'delete',touchId:id,touchLabel:touchLabel});
   }).catch(function(e){alert('Delete failed: '+e.message);});
 }
 
@@ -815,8 +942,10 @@ async function submitAddTouch(){
     addedBy:currentUser||'Anonymous',
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   };
+  if(!db){alert('Firebase not connected — cannot add touches in offline mode.');return;}
   try{
     await db.collection('touches').doc(newId).set(doc);
+    logChange({type:'add',touchId:newId,touchLabel:'Day '+day+': '+title.substring(0,50),field:null,oldValue:null,newValue:null});
     closeAddModal();
   }catch(e){alert('Could not add touch: '+e.message);}
 }
@@ -851,6 +980,10 @@ function closeCmtPanel(){
 }
 function loadComments(targetId){
   if(cmtUnsub)cmtUnsub();
+  if(!db){
+    document.getElementById('cmt-list').innerHTML='<div style="text-align:center;padding:16px;font-size:12px;color:#f59e0b">⚠ Firebase not connected. Comments require the Vercel-hosted version.</div>';
+    return;
+  }
   /* No orderBy here — avoids needing a composite Firestore index. Sort client-side instead. */
   cmtUnsub=db.collection('comments')
     .where('targetId','==',targetId)
@@ -881,13 +1014,15 @@ function renderComments(comments){
       return '<div class="reply-card"><div class="reply-avatar">'+initials(r.author)+'</div><div class="reply-body"><div class="reply-meta"><strong>'+escHtml(r.author)+'</strong> · '+rts+'</div><div class="reply-text">'+escHtml(r.text)+'</div></div></div>';
     }).join('');
     var replySection='<div class="cmt-replies">'+replies+'<div class="reply-input-row"><input class="reply-input" placeholder="Reply…" id="ri-'+c.fsId+'" onkeydown="if(event.key===\'Enter\')sendReply(\''+c.fsId+'\')"><button class="reply-send" onclick="sendReply(\''+c.fsId+'\')">↵</button></div></div>';
-    return '<div class="cmt-card'+(c.resolved?' resolved':'')+'"><div class="cmt-meta"><div class="cmt-avatar">'+initials(c.author)+'</div><div class="cmt-author">'+escHtml(c.author||'Anonymous')+'</div><div class="cmt-time">'+ts+'</div></div><div class="cmt-text">'+escHtml(c.text)+'</div><div class="cmt-actions">'+resolvedHtml+'</div>'+replySection+'</div>';
+    var deleteBtn='<button class="cmt-action-btn" onclick="deleteComment(\''+c.fsId+'\')" title="Delete comment" style="margin-left:auto;color:#ef4444">🗑 Delete</button>';
+    return '<div class="cmt-card'+(c.resolved?' resolved':'')+'"><div class="cmt-meta"><div class="cmt-avatar">'+initials(c.author)+'</div><div class="cmt-author">'+escHtml(c.author||'Anonymous')+'</div><div class="cmt-time">'+ts+'</div></div><div class="cmt-text">'+escHtml(c.text)+'</div><div class="cmt-actions">'+resolvedHtml+deleteBtn+'</div>'+replySection+'</div>';
   }).join('');
   list.scrollTop=list.scrollHeight;
 }
 function sendComment(){
   var txt=document.getElementById('cmt-input').value.trim();
   if(!txt)return;
+  if(!db){alert('Firebase not connected — comments require the Vercel-hosted version.');return;}
   db.collection('comments').add({
     targetId:cmtTargetId,author:currentUser||'Anonymous',text:txt,
     resolved:false,replies:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()
@@ -906,21 +1041,236 @@ function resolveComment(cmtId){
     resolved:true,resolvedBy:currentUser||'Anonymous',resolvedAt:firebase.firestore.FieldValue.serverTimestamp()
   }).catch(function(e){alert('Resolve failed: '+e.message);});
 }
+function deleteComment(cmtId){
+  if(!confirm('Delete this comment permanently? This cannot be undone.'))return;
+  if(!db){alert('Firebase not connected.');return;}
+  db.collection('comments').doc(cmtId).delete()
+    .catch(function(e){alert('Delete failed: '+e.message);});
+}
 document.getElementById('cmt-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendComment();}});
 
-/* ─── Firestore live listener ─── */
-db.collection('touches').orderBy('order','asc').onSnapshot(function(snap){
-  var touches=snap.docs.map(function(d){return Object.assign({fsId:d.id},d.data());});
-  renderWeeks(touches);
-},function(e){
-  console.warn('Touches listener error:',e);
-  document.getElementById('weeks-container').innerHTML='<div style="text-align:center;padding:32px;font-size:12px;color:#ef4444">Could not connect to Firestore. Check Firebase config and rules.</div>';
+/* ─── Changelog ─── */
+var fieldLabels={title:'Subject line',type:'Type / description',trigger:'Trigger',day:'Day'};
+
+function logChange(entry){
+  if(!db)return;
+  db.collection('changelog').add(Object.assign({},entry,{
+    author:currentUser||'Anonymous',
+    timestamp:firebase.firestore.FieldValue.serverTimestamp()
+  })).catch(function(e){console.warn('Changelog write failed:',e);});
+}
+
+function openChangelog(){
+  document.getElementById('cl-panel').classList.add('open');
+}
+function closeChangelog(){
+  document.getElementById('cl-panel').classList.remove('open');
+}
+
+function renderChangelog(entries){
+  var body=document.getElementById('cl-body');
+  if(!entries.length){
+    body.innerHTML='<div id="cl-empty">No changes logged yet.</div>';
+    return;
+  }
+  body.innerHTML=entries.map(function(e){
+    var ts=e.timestamp&&e.timestamp.toDate?timeAgo(e.timestamp.toDate()):'just now';
+    var typeLabel=e.type==='edit'?'Field edited':e.type==='add'?'Touch added':'Touch removed';
+    var typeClass='cl-'+e.type;
+    var changeHtml='';
+    if(e.type==='edit'){
+      var fLabel=fieldLabels[e.field]||e.field;
+      changeHtml='<div class="cl-change"><strong>'+escHtml(fLabel)+'</strong><br>'
+        +'<span class="cl-old">'+escHtml(e.oldValue||'(empty)')+'</span>'
+        +'<span class="cl-arrow">→</span>'
+        +'<span class="cl-new">'+escHtml(e.newValue||'(empty)')+'</span>'
+        +'</div>';
+    }
+    return '<div class="cl-item '+typeClass+'">'
+      +'<div class="cl-type">'+typeLabel+'</div>'
+      +'<div class="cl-touch">'+escHtml(e.touchLabel||'')+'</div>'
+      +changeHtml
+      +'<div class="cl-meta"><span class="cl-author">'+escHtml(e.author||'Anonymous')+'</span><span>'+ts+'</span></div>'
+      +'</div>';
+  }).join('');
+}
+
+/* Firestore changelog listener */
+if(db){
+  db.collection('changelog').onSnapshot(function(snap){
+    var entries=snap.docs.map(function(d){return Object.assign({fsId:d.id},d.data());});
+    entries.sort(function(a,b){
+      var ta=a.timestamp&&a.timestamp.toDate?a.timestamp.toDate().getTime():0;
+      var tb=b.timestamp&&b.timestamp.toDate?b.timestamp.toDate().getTime():0;
+      return tb-ta; /* newest first */
+    });
+    renderChangelog(entries);
+  },function(e){console.warn('Changelog listener error:',e);});
+}
+
+/* ─── Global comments listener — powers indicators + All Comments panel ─── */
+var allCommentsData=[];
+var cmtFilter='all';
+
+function targetLabel(targetId){
+  if(targetId.startsWith('touch-')){
+    var tid=targetId.replace('touch-','');
+    var t=allTouches.find(function(x){return x.id===tid;});
+    return t?('T'+t._num+': '+t.title.substring(0,40)):targetId;
+  }
+  if(targetId.startsWith('week-')){
+    var wi=parseInt(targetId.replace('week-',''));
+    return weekGroups[wi]?weekGroups[wi].label:targetId;
+  }
+  if(targetId==='section-postactivation')return'Post-activation onboarding series';
+  if(targetId==='section-m4-12')return'Months 4–12 slow drip + lifecycle';
+  if(targetId==='section-system')return'System emails';
+  return targetId;
+}
+
+function applyIndicators(){
+  /* Build unresolved counts per targetId */
+  var counts={};
+  var totalUnresolved=0;
+  allCommentsData.forEach(function(c){
+    if(!c.resolved){
+      counts[c.targetId]=(counts[c.targetId]||0)+1;
+      totalUnresolved++;
+    }
+  });
+  /* Update global badge on All Comments button */
+  var gb=document.getElementById('global-unresolved-badge');
+  if(gb){if(totalUnresolved>0){gb.textContent=totalUnresolved;gb.style.display='';}else{gb.style.display='none';}}
+  /* Toggle amber state on Activity button */
+  var toggle=document.getElementById('save-toggle');
+  if(toggle){if(totalUnresolved>0)toggle.classList.add('has-unresolved');else toggle.classList.remove('has-unresolved');}
+  /* Update all indicator buttons */
+  document.querySelectorAll('[id^="cind-"]').forEach(function(btn){
+    var id=btn.id.replace('cind-','');
+    /* Map element id back to targetId */
+    var targetId=id.startsWith('touch-')||id.startsWith('week-')||id.startsWith('section-')?id:'touch-'+id;
+    var n=counts[targetId]||0;
+    /* Remove old badge */
+    var old=btn.querySelector('.cmt-ind');
+    if(old)old.remove();
+    if(n>0){
+      btn.classList.add('has-unresolved');
+      var badge=document.createElement('span');
+      badge.className='cmt-ind';
+      badge.textContent=n;
+      btn.appendChild(badge);
+    }else{
+      btn.classList.remove('has-unresolved');
+    }
+  });
+}
+
+function openAllComments(){
+  document.getElementById('allcmt-panel').classList.add('open');
+  document.getElementById('cmt-overlay').style.display='block';
+  renderAllComments();
+}
+function closeAllComments(){
+  document.getElementById('allcmt-panel').classList.remove('open');
+  document.getElementById('cmt-overlay').style.display='none';
+}
+function setFilter(f){
+  cmtFilter=f;
+  document.querySelectorAll('.acf-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('f-'+f).classList.add('active');
+  renderAllComments();
+}
+
+function renderAllComments(){
+  var body=document.getElementById('allcmt-body');
+  var data=allCommentsData.slice();
+  /* Apply filter */
+  if(cmtFilter==='open')data=data.filter(function(c){return !c.resolved;});
+  if(cmtFilter==='resolved')data=data.filter(function(c){return c.resolved;});
+  if(!data.length){
+    body.innerHTML='<div id="allcmt-empty">'+(cmtFilter==='open'?'No open comments — all resolved!':cmtFilter==='resolved'?'No resolved comments yet.':'No comments yet.')+'</div>';
+    return;
+  }
+  /* Group by author */
+  var byAuthor={};
+  data.forEach(function(c){
+    var a=c.author||'Anonymous';
+    if(!byAuthor[a])byAuthor[a]=[];
+    byAuthor[a].push(c);
+  });
+  /* Sort authors by most recent comment */
+  var authors=Object.keys(byAuthor).sort(function(a,b){
+    var ta=byAuthor[a].reduce(function(m,c){var t=c.createdAt&&c.createdAt.toDate?c.createdAt.toDate().getTime():0;return Math.max(m,t);},0);
+    var tb=byAuthor[b].reduce(function(m,c){var t=c.createdAt&&c.createdAt.toDate?c.createdAt.toDate().getTime():0;return Math.max(m,t);},0);
+    return tb-ta;
+  });
+  var html='';
+  authors.forEach(function(author){
+    var cmts=byAuthor[author].sort(function(a,b){
+      var ta=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate().getTime():0;
+      var tb=b.createdAt&&b.createdAt.toDate?b.createdAt.toDate().getTime():0;
+      return tb-ta;
+    });
+    var openCount=cmts.filter(function(c){return !c.resolved;}).length;
+    html+='<div class="ac-author-group">';
+    html+='<div class="ac-author-hdr">';
+    html+='<div class="ac-author-avatar">'+initials(author)+'</div>';
+    html+='<div class="ac-author-name">'+escHtml(author)+'</div>';
+    html+='<div class="ac-author-count">'+cmts.length+' comment'+(cmts.length!==1?'s':'')+''+(openCount?' · <span style="color:#d97706;font-weight:600">'+openCount+' open</span>':'')+'</div>';
+    html+='</div>';
+    cmts.forEach(function(c){
+      var ts=c.createdAt&&c.createdAt.toDate?timeAgo(c.createdAt.toDate()):'just now';
+      var loc=targetLabel(c.targetId||'');
+      var statusHtml=c.resolved
+        ?'<span class="ac-status-done">✓ Resolved'+(c.resolvedBy?' by '+escHtml(c.resolvedBy):'')+'</span>'
+        :'<span class="ac-status-open">● Open</span>';
+      html+='<div class="ac-item '+(c.resolved?'resolved':'unresolved')+'" onclick="openCmt(\''+escHtml(c.targetId||'')+'\',\''+escHtml(loc)+'\')">';
+      html+='<div class="ac-location">'+escHtml(loc)+'</div>';
+      html+='<div class="ac-text">'+escHtml(c.text)+'</div>';
+      html+='<div class="ac-meta">'+statusHtml+'<span style="margin-left:auto">'+ts+'</span></div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+  body.innerHTML=html;
+}
+
+/* Start global comments listener */
+if(db){
+  db.collection('comments').onSnapshot(function(snap){
+    allCommentsData=snap.docs.map(function(d){return Object.assign({fsId:d.id},d.data());});
+    applyIndicators();
+    if(document.getElementById('allcmt-panel').classList.contains('open'))renderAllComments();
+  },function(e){console.warn('Global comments listener error:',e);});
+}
+
+/* Override closeCmtPanel overlay click to also close allcmt panel */
+document.getElementById('cmt-overlay').addEventListener('click',function(){
+  closeCmtPanel();
+  closeAllComments();
 });
 
-/* ─── Export ─── */
-function toggleSaveMenu(e){e.stopPropagation();document.getElementById('save-menu').classList.toggle('open');}
-function closeSaveMenu(){document.getElementById('save-menu').classList.remove('open');}
-document.addEventListener('click',function(){closeSaveMenu();});
+/* ─── Firestore live listener (or fall back to seed data) ─── */
+if(db){
+  db.collection('touches').onSnapshot(function(snap){
+    var touches=snap.docs.map(function(d){return Object.assign({fsId:d.id},d.data());});
+    renderWeeks(touches);
+  },function(e){
+    console.warn('Touches listener error:',e);
+    /* Firestore rules likely blocking — show seed data so page is still useful */
+    document.getElementById('weeks-container').innerHTML='';
+    renderWeeks(SEED);
+    document.getElementById('live-bar').innerHTML='<span style="color:#ef4444">⚠ Firestore permission denied. Go to Firebase Console → Firestore → Rules and set allow read, write: if true; — then reload.</span>';
+  });
+}else{
+  /* No Firebase at all — render from seed so everything is still visible */
+  renderWeeks(SEED);
+}
+
+/* ─── Activity dropdown ─── */
+function toggleActivityMenu(e){e.stopPropagation();document.getElementById('save-menu').classList.toggle('open');}
+function closeActivityMenu(){document.getElementById('save-menu').classList.remove('open');}
+document.addEventListener('click',function(){closeActivityMenu();});
 function saveSnapshot(){
   var html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
   var blob=new Blob([html],{type:'text/html'});
@@ -930,19 +1280,6 @@ function saveSnapshot(){
   a.click();
   URL.revokeObjectURL(a.href);
   showToast();
-}
-function dateStamp(){var t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');}
-function showToast(msg){var t=document.getElementById('save-toast');if(msg)t.textContent=msg;t.style.opacity='1';setTimeout(function(){t.style.opacity='0';},2500);}
-
-/* ─── Helpers ─── */
-function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function initials(name){return (name||'?').split(' ').map(function(p){return p[0]||'';}).join('').substring(0,2).toUpperCase();}
-function timeAgo(d){
-  var s=Math.floor((Date.now()-d.getTime())/1000);
-  if(s<60)return 'just now';
-  if(s<3600)return Math.floor(s/60)+'m ago';
-  if(s<86400)return Math.floor(s/3600)+'h ago';
-  return Math.floor(s/86400)+'d ago';
 }
 </script>
 </body>
