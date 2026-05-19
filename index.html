@@ -835,8 +835,9 @@ function renderWeeks(touches){
     html+='</div>';
   });
   container.innerHTML=html;
-  /* Attach edit listeners */
+  /* Attach edit listeners and row button delegation */
   attachEditListeners();
+  attachRowButtons();
   /* Update gantt */
   updateGanttFromTouches(active);
   /* Re-apply comment indicators after DOM rebuilt */
@@ -878,12 +879,33 @@ function renderTouchRow(t){
     +'<div class="em-right">'
     +'<div class="em-tags">'+tagHtml+'</div>'
     +'<div class="em-row-acts">'
-    +(getMockupUrl(t)?'<button class="preview-btn has-mockup" onclick="openMockup(\''+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="View email mockup">🖼</button>':'<button class="upload-btn" onclick="triggerMockupUpload(\''+t.id+'\')" title="Upload email mockup">📎</button>')
-    +'<button class="cmt-btn" id="cind-touch-'+t.id+'" onclick="openCmt(\'touch-'+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="Comments">💬</button>'
-    +'<button class="del-btn" onclick="deleteTouch(\''+t.id+'\')" title="Remove touch">🗑</button>'
+    +(getMockupUrl(t)
+      ?'<button class="preview-btn has-mockup" data-id="'+t.id+'" data-title="'+escHtml('T'+t._num+': '+t.title.substring(0,40))+'" title="View email mockup">🖼</button>'
+      :'<button class="upload-btn" data-id="'+t.id+'" title="Upload email mockup">📎</button>')
+    +'<button class="cmt-btn" id="cind-touch-'+t.id+'" data-id="'+t.id+'" data-title="'+escHtml('T'+t._num+': '+t.title.substring(0,40))+'" title="Comments">💬</button>'
+    +'<button class="del-btn" data-id="'+t.id+'" title="Remove touch">🗑</button>'
     +'</div>'
     +'</div>'
     +'</div>';
+}
+
+/* ─── Row button delegation (avoids apostrophe-in-title onclick bugs) ─── */
+function attachRowButtons(){
+  var container=document.getElementById('weeks-container');
+  if(!container)return;
+  /* Remove old listener to avoid duplicates on re-render */
+  if(container._rowBtnListener)container.removeEventListener('click',container._rowBtnListener);
+  container._rowBtnListener=function(e){
+    var btn=e.target.closest('button');
+    if(!btn)return;
+    var id=btn.dataset.id;
+    var title=btn.dataset.title||'';
+    if(btn.classList.contains('preview-btn')){openMockup(id,title);}
+    else if(btn.classList.contains('upload-btn')){triggerMockupUpload(id);}
+    else if(btn.classList.contains('cmt-btn')){openCmt('touch-'+id,title);}
+    else if(btn.classList.contains('del-btn')){deleteTouch(id);}
+  };
+  container.addEventListener('click',container._rowBtnListener);
 }
 
 /* ─── Edit sync ─── */
