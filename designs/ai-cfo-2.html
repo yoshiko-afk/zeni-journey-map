@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI CFO — Email 2: Drop a doc in. Get the answer out.</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f0f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px 16px;min-height:100vh}
+.email{max-width:540px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+.body{padding:40px 40px 32px}
+.badge{display:inline-flex;align-items:center;gap:7px;background:#f4f4f5;border-radius:20px;padding:7px 14px;margin-bottom:28px}
+.badge-icon{width:16px;height:16px;flex-shrink:0}
+.badge-text{font-size:13px;font-weight:700;color:#18181b;letter-spacing:.2px}
+h1{font-size:38px;font-weight:800;color:#0f0f0f;line-height:1.13;margin-bottom:20px;letter-spacing:-.5px}
+.greeting{font-size:15px;color:#374151;margin-bottom:14px}
+.token{background:#fef9c3;border-radius:4px;padding:1px 5px;font-weight:600;color:#854d0e}
+.body-copy{font-size:15px;color:#4b5563;line-height:1.65;margin-bottom:24px}
+/* Upload zone */
+.upload-zone{border:1.5px dashed #a78bfa;border-radius:10px;background:#faf5ff;padding:20px 20px;display:flex;align-items:center;gap:16px;margin-bottom:22px}
+.upload-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.upload-text-main{font-size:14px;font-weight:700;color:#1f1f1f;margin-bottom:3px}
+.upload-text-sub{font-size:12.5px;color:#9ca3af}
+/* Doc type grid */
+.doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.doc-card{border:1px solid #e5e7eb;border-radius:10px;padding:14px 14px;display:flex;align-items:flex-start;gap:12px}
+.doc-icon{width:40px;height:48px;border-radius:6px;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:5px;font-size:7.5px;font-weight:800;letter-spacing:.3px}
+.doc-icon.bank{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+.doc-icon.pay{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+.doc-icon.fcst{background:#fff7ed;border:1px solid #fed7aa;color:#c2410c}
+.doc-icon.inv{background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+.doc-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:#9ca3af;text-transform:uppercase;margin-bottom:4px}
+.doc-desc{font-size:13px;color:#374151;line-height:1.45}
+.body-copy-2{font-size:15px;color:#4b5563;line-height:1.65;margin-bottom:24px}
+.cta{display:inline-block;background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);color:#fff;text-decoration:none;border-radius:50px;padding:14px 26px;font-size:15px;font-weight:700;margin-bottom:8px;letter-spacing:.1px}
+.footer{padding:20px 40px;border-top:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.footer-brand .logo{font-size:15px;font-weight:700;color:#18181b;margin-bottom:3px}
+.footer-brand .addr{font-size:11.5px;color:#9ca3af}
+.footer-links{display:flex;gap:14px}
+.footer-links a{font-size:11.5px;color:#9ca3af;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="email">
+  <div class="body">
+
+    <!-- Badge -->
+    <div class="badge">
+      <svg class="badge-icon" viewBox="0 0 16 16" fill="none"><path d="M8 0 L9.4 5.2 L14.9 7.1 L9.4 8.9 L8 16 L6.6 8.9 L1.1 7.1 L6.6 5.2 Z" fill="url(#sp1)"/><defs><linearGradient id="sp1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs></svg>
+      <span class="badge-text">AI CFO</span>
+    </div>
+
+    <!-- Headline -->
+    <h1>Drop a doc in.<br>Get the answer out.</h1>
+
+    <p class="greeting">Hi <span class="token">{{First Name}}</span>,</p>
+
+    <p class="body-copy">AI CFO can also give you answers on whatever financial document is in front of you. Bank statement. Vendor invoice. Payment sheet. Forecast. <strong>Upload it and put AI CFO to work.</strong></p>
+
+    <!-- Upload zone -->
+    <div class="upload-zone">
+      <div class="upload-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 4v12M8 8l4-4 4 4M4 20h16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="upload-text-main">Drag a file here, or click to upload</div>
+        <div class="upload-text-sub">PDF, CSV, XLSX — AI CFO does the rest.</div>
+      </div>
+    </div>
+
+    <!-- Doc type grid -->
+    <div class="doc-grid">
+      <div class="doc-card">
+        <div class="doc-icon bank">
+          BANK<br><br>
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" style="position:absolute;margin-top:2px"><line x1="2" y1="5" x2="16" y2="5" stroke="#15803d" stroke-width="1.5"/><line x1="2" y1="8" x2="12" y2="8" stroke="#15803d" stroke-width="1.5"/><line x1="2" y1="11" x2="10" y2="11" stroke="#15803d" stroke-width="1.5"/></svg>
+        </div>
+        <div>
+          <div class="doc-label">Bank Statement</div>
+          <div class="doc-desc">Get a breakdown of where money moved — and why.</div>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-icon pay">PAY</div>
+        <div>
+          <div class="doc-label">Payment Sheet</div>
+          <div class="doc-desc">Get the exact journal entries to record, in your dashboard.</div>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-icon fcst">FCST</div>
+        <div>
+          <div class="doc-label">Forecast</div>
+          <div class="doc-desc">Compared against history — gaps surfaced for you.</div>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-icon inv">INV</div>
+        <div>
+          <div class="doc-label">Vendor Invoice</div>
+          <div class="doc-desc">Clarity on how to categorize and record it.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="body-copy-2">No manual translation. No figuring out how to categorize things yourself. <strong>Upload, ask, and act — all inside Zeni.</strong></p>
+
+    <a href="#" class="cta">Upload a document →</a>
+  </div>
+
+  <div class="footer">
+    <div class="footer-brand">
+      <div class="logo">~zeni</div>
+      <div class="addr">350 Cambridge Ave, Palo Alto, CA 94306</div>
+    </div>
+    <div class="footer-links">
+      <a href="#">Help center</a>
+      <a href="#">Preferences</a>
+      <a href="#">Unsubscribe</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

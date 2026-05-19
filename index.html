@@ -286,6 +286,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .cl-ctx-day{color:#94a3b8}
 .cl-ctx-tags{display:flex;flex-wrap:wrap;gap:3px}
 
+/* MOCKUP MODAL */
+#mockup-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1500;display:none;align-items:center;justify-content:center;padding:24px}
+#mockup-overlay.open{display:flex}
+#mockup-modal{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.22);width:100%;max-width:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+#mockup-modal-hdr{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:10px;flex-shrink:0}
+#mockup-modal-title{font-size:13px;font-weight:700;color:#0f172a;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mockup-cmt-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;border:1px solid rgba(0,0,0,.1);background:#fff;font-size:11px;font-weight:600;color:#7c3aed;cursor:pointer;transition:background .12s}
+#mockup-cmt-btn:hover{background:#ede9fe}
+#mockup-modal-close{width:28px;height:28px;border:none;background:none;cursor:pointer;border-radius:6px;color:#94a3b8;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#mockup-modal-close:hover{background:#f1f5f9;color:#0f172a}
+#mockup-iframe{flex:1;border:none;width:100%;min-height:0}
+.preview-btn{width:22px;height:22px;border-radius:5px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px;transition:background .12s,color .12s}
+.preview-btn:hover{background:#ede9fe;color:#7c3aed}
+.preview-btn.has-mockup{color:#7c3aed;opacity:1!important}
+
 /* LIVE INDICATOR */
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -369,6 +384,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
   <div id="cmt-composer">
     <textarea id="cmt-input" placeholder="Add a comment…"></textarea>
     <button id="cmt-send" onclick="sendComment()">Post comment</button>
+  </div>
+</div>
+
+<!-- MOCKUP MODAL -->
+<div id="mockup-overlay" onclick="if(event.target===this)closeMockup()">
+  <div id="mockup-modal">
+    <div id="mockup-modal-hdr">
+      <div id="mockup-modal-title">Email preview</div>
+      <button id="mockup-cmt-btn" onclick="openMockupComments()">💬 Comments</button>
+      <button id="mockup-modal-close" onclick="closeMockup()">✕</button>
+    </div>
+    <iframe id="mockup-iframe" src="" sandbox="allow-scripts allow-same-origin"></iframe>
   </div>
 </div>
 
@@ -841,6 +868,7 @@ function renderTouchRow(t){
     +'<div class="em-right">'
     +'<div class="em-tags">'+tagHtml+'</div>'
     +'<div class="em-row-acts">'
+    +(mockupMap[t.id]?'<button class="preview-btn has-mockup" onclick="openMockup(\''+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="View email mockup">🖼</button>':'')
     +'<button class="cmt-btn" id="cind-touch-'+t.id+'" onclick="openCmt(\'touch-'+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="Comments">💬</button>'
     +'<button class="del-btn" onclick="deleteTouch(\''+t.id+'\')" title="Remove touch">🗑</button>'
     +'</div>'
@@ -1064,6 +1092,34 @@ function deleteComment(cmtId){
     .catch(function(e){alert('Delete failed: '+e.message);});
 }
 document.getElementById('cmt-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendComment();}});
+
+/* ─── Mockup previews ─── */
+var mockupMap={
+  't2':'designs/ai-cfo-1.html',
+  't5':'designs/ai-cfo-2.html',
+  't8':'designs/ai-cfo-3.html'
+};
+var _mockupTouchId=null;
+function openMockup(id,title){
+  var url=mockupMap[id];
+  if(!url)return;
+  _mockupTouchId=id;
+  document.getElementById('mockup-iframe').src=url;
+  document.getElementById('mockup-modal-title').textContent=title||'Email preview';
+  document.getElementById('mockup-overlay').classList.add('open');
+}
+function closeMockup(){
+  document.getElementById('mockup-overlay').classList.remove('open');
+  document.getElementById('mockup-iframe').src='';
+  _mockupTouchId=null;
+}
+function openMockupComments(){
+  if(!_mockupTouchId)return;
+  var t=allTouches.find(function(x){return x.id===_mockupTouchId;});
+  var label=t?('T'+t._num+': '+t.title.substring(0,40)):'Email';
+  closeMockup();
+  openCmt('touch-'+_mockupTouchId,label);
+}
 
 /* ─── Changelog ─── */
 var fieldLabels={title:'Subject line',type:'Type / description',trigger:'Trigger',day:'Day'};
