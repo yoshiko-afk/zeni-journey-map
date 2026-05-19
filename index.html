@@ -6,6 +6,7 @@
 <title>Zeni Journey Map · Live</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f172a;background:#fff;padding:40px 48px;max-width:1200px;margin:0 auto;line-height:1.5}
@@ -286,19 +287,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .cl-ctx-day{color:#94a3b8}
 .cl-ctx-tags{display:flex;flex-wrap:wrap;gap:3px}
 
-/* MOCKUP MODAL */
-#mockup-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1500;display:none;align-items:center;justify-content:center;padding:24px}
+/* MOCKUP LIGHTBOX */
+#mockup-overlay{position:fixed;inset:0;background:rgba(10,10,20,.82);z-index:1500;display:none;flex-direction:column;align-items:center}
 #mockup-overlay.open{display:flex}
-#mockup-modal{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.22);width:100%;max-width:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
-#mockup-modal-hdr{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:10px;flex-shrink:0}
-#mockup-modal-title{font-size:13px;font-weight:700;color:#0f172a;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#mockup-cmt-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;border:1px solid rgba(0,0,0,.1);background:#fff;font-size:11px;font-weight:600;color:#7c3aed;cursor:pointer;transition:background .12s}
-#mockup-cmt-btn:hover{background:#ede9fe}
-#mockup-modal-close{width:28px;height:28px;border:none;background:none;cursor:pointer;border-radius:6px;color:#94a3b8;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#mockup-modal-close:hover{background:#f1f5f9;color:#0f172a}
-#mockup-iframe{flex:1;border:none;width:100%;min-height:0}
-.preview-btn{width:22px;height:22px;border-radius:5px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px;transition:background .12s,color .12s}
+#mockup-toolbar{width:100%;max-width:680px;display:flex;align-items:center;gap:10px;padding:12px 16px;flex-shrink:0}
+#mockup-modal-title{font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mockup-cmt-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);font-size:11px;font-weight:600;color:#fff;cursor:pointer;transition:background .12s}
+#mockup-cmt-btn:hover{background:rgba(255,255,255,.2)}
+#mockup-modal-close{width:30px;height:30px;border:none;background:rgba(255,255,255,.1);cursor:pointer;border-radius:7px;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s}
+#mockup-modal-close:hover{background:rgba(255,255,255,.22)}
+#mockup-img-wrap{flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;padding:0 16px 32px}
+#mockup-img{width:600px;max-width:100%;border-radius:8px;display:block;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+/* Upload progress */
+#mockup-upload-bar{height:3px;width:100%;background:rgba(255,255,255,.1);flex-shrink:0;display:none}
+#mockup-upload-fill{height:100%;width:0%;background:#a78bfa;transition:width .2s}
+/* Row buttons */
+.preview-btn,.upload-btn{width:22px;height:22px;border-radius:5px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;transition:background .12s,color .12s}
 .preview-btn:hover{background:#ede9fe;color:#7c3aed}
+.upload-btn:hover{background:#dbeafe;color:#2563eb}
 .preview-btn.has-mockup{color:#7c3aed;opacity:1!important}
 
 /* LIVE INDICATOR */
@@ -387,17 +393,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
   </div>
 </div>
 
-<!-- MOCKUP MODAL -->
+<!-- MOCKUP LIGHTBOX -->
 <div id="mockup-overlay" onclick="if(event.target===this)closeMockup()">
-  <div id="mockup-modal">
-    <div id="mockup-modal-hdr">
-      <div id="mockup-modal-title">Email preview</div>
-      <button id="mockup-cmt-btn" onclick="openMockupComments()">💬 Comments</button>
-      <button id="mockup-modal-close" onclick="closeMockup()">✕</button>
-    </div>
-    <iframe id="mockup-iframe" src="" sandbox="allow-scripts allow-same-origin"></iframe>
+  <div id="mockup-toolbar">
+    <div id="mockup-modal-title">Email preview</div>
+    <button id="mockup-cmt-btn" onclick="openMockupComments()">💬 Comments</button>
+    <button id="mockup-modal-close" onclick="closeMockup()">✕</button>
+  </div>
+  <div id="mockup-upload-bar"><div id="mockup-upload-fill"></div></div>
+  <div id="mockup-img-wrap">
+    <img id="mockup-img" src="" alt="Email mockup">
   </div>
 </div>
+<!-- hidden file input for mockup uploads -->
+<input type="file" id="mockup-file-input" accept="image/*" style="display:none" onchange="handleMockupUpload(this)"
 
 <!-- CHANGELOG PANEL -->
 <div id="cl-panel">
@@ -559,12 +568,13 @@ function dateStamp(){var t=new Date();return t.getFullYear()+'-'+String(t.getMon
 function showToast(msg){var t=document.getElementById('save-toast');if(msg)t.textContent=msg;t.style.opacity='1';setTimeout(function(){t.style.opacity='0';},2500);}
 
 /* ─── Firebase (safe init — won't crash page if CDN unavailable) ─── */
-var db=null;
+var db=null;var storage=null;
 try{
   var firebaseConfig={apiKey:"AIzaSyCNAeUZzODk1wQwmaVgerWOlEirVx7OrGo",authDomain:"zeni-journey.firebaseapp.com",projectId:"zeni-journey",storageBucket:"zeni-journey.firebasestorage.app",messagingSenderId:"821260249677",appId:"1:821260249677:web:f27c4226c94c7f3da44a04"};
   if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
   else if(typeof firebase!=='undefined'&&firebase.apps.length){}
   db=firebase.firestore();
+  storage=firebase.storage();
 }catch(e){
   console.warn('Firebase init failed — running in offline/preview mode:',e);
   document.getElementById('live-bar').innerHTML='<span style="color:#f59e0b">⚠ Firebase offline — showing preview data. Deploy to Vercel for live collaboration.</span>';
@@ -868,7 +878,7 @@ function renderTouchRow(t){
     +'<div class="em-right">'
     +'<div class="em-tags">'+tagHtml+'</div>'
     +'<div class="em-row-acts">'
-    +(mockupMap[t.id]?'<button class="preview-btn has-mockup" onclick="openMockup(\''+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="View email mockup">🖼</button>':'')
+    +(getMockupUrl(t)?'<button class="preview-btn has-mockup" onclick="openMockup(\''+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="View email mockup">🖼</button>':'<button class="upload-btn" onclick="triggerMockupUpload(\''+t.id+'\')" title="Upload email mockup">📎</button>')
     +'<button class="cmt-btn" id="cind-touch-'+t.id+'" onclick="openCmt(\'touch-'+t.id+'\',\'T'+t._num+': '+escHtml(t.title.substring(0,40))+'\')" title="Comments">💬</button>'
     +'<button class="del-btn" onclick="deleteTouch(\''+t.id+'\')" title="Remove touch">🗑</button>'
     +'</div>'
@@ -1095,30 +1105,82 @@ document.getElementById('cmt-input').addEventListener('keydown',function(e){if(e
 
 /* ─── Mockup previews ─── */
 var mockupMap={
-  't2':'designs/ai-cfo-1.html',
-  't5':'designs/ai-cfo-2.html',
-  't8':'designs/ai-cfo-3.html'
+  't2':'designs/ai-cfo-1.png',
+  't5':'designs/ai-cfo-2.png',
+  't8':'designs/ai-cfo-3.png'
 };
 var _mockupTouchId=null;
+var _uploadTargetId=null;
+
+function getMockupUrl(t){
+  /* Prefer a Firebase-stored URL on the touch doc, fall back to static map */
+  return (t&&t.mockupUrl)||mockupMap[t&&t.id]||null;
+}
+
 function openMockup(id,title){
-  var url=mockupMap[id];
+  var t=allTouches.find(function(x){return x.id===id;});
+  var url=getMockupUrl(t);
   if(!url)return;
   _mockupTouchId=id;
-  document.getElementById('mockup-iframe').src=url;
+  var img=document.getElementById('mockup-img');
+  img.src=url;
   document.getElementById('mockup-modal-title').textContent=title||'Email preview';
+  document.getElementById('mockup-img-wrap').scrollTop=0;
   document.getElementById('mockup-overlay').classList.add('open');
 }
+
 function closeMockup(){
   document.getElementById('mockup-overlay').classList.remove('open');
-  document.getElementById('mockup-iframe').src='';
+  document.getElementById('mockup-img').src='';
   _mockupTouchId=null;
 }
+
 function openMockupComments(){
   if(!_mockupTouchId)return;
   var t=allTouches.find(function(x){return x.id===_mockupTouchId;});
   var label=t?('T'+t._num+': '+t.title.substring(0,40)):'Email';
   closeMockup();
   openCmt('touch-'+_mockupTouchId,label);
+}
+
+function triggerMockupUpload(id){
+  _uploadTargetId=id;
+  var inp=document.getElementById('mockup-file-input');
+  inp.value='';
+  inp.click();
+}
+
+function handleMockupUpload(inp){
+  var id=_uploadTargetId;
+  if(!id||!inp.files.length)return;
+  if(!storage||!db){alert('Firebase not connected — upload unavailable.');return;}
+  var file=inp.files[0];
+  if(!file.type.startsWith('image/')){alert('Please select an image file.');return;}
+  var bar=document.getElementById('mockup-upload-bar');
+  var fill=document.getElementById('mockup-upload-fill');
+  bar.style.display='block';
+  fill.style.width='0%';
+  var ref=storage.ref('mockups/'+id+'-'+Date.now()+'.png');
+  var task=ref.put(file);
+  task.on('state_changed',
+    function(snap){fill.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%';},
+    function(err){bar.style.display='none';alert('Upload failed: '+err.message);},
+    function(){
+      task.snapshot.ref.getDownloadURL().then(function(url){
+        bar.style.display='none';
+        fill.style.width='0%';
+        db.collection('touches').doc(id).update({mockupUrl:url}).then(function(){
+          showToast('✓ Mockup uploaded');
+          /* update local cache so preview icon appears immediately */
+          var t=allTouches.find(function(x){return x.id===id;});
+          if(t)t.mockupUrl=url;
+          /* open the lightbox straight away */
+          var t2=allTouches.find(function(x){return x.id===id;});
+          openMockup(id,t2?('T'+t2._num+': '+t2.title.substring(0,40)):'Email preview');
+        });
+      });
+    }
+  );
 }
 
 /* ─── Changelog ─── */
