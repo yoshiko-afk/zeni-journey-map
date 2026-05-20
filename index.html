@@ -307,6 +307,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .upload-btn:hover{background:#dbeafe;color:#2563eb}
 .preview-btn.has-mockup{color:#7c3aed;opacity:1!important}
 
+/* EDIT SAVE BAR */
+#edit-save-bar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;border-radius:12px;padding:10px 14px 10px 16px;display:none;align-items:center;gap:10px;z-index:1200;box-shadow:0 4px 24px rgba(0,0,0,.25);font-size:12px;white-space:nowrap;border:1px solid rgba(255,255,255,.08)}
+#edit-save-bar.visible{display:flex}
+#edit-save-label{color:#64748b;font-size:11px}
+#edit-save-who{font-weight:600;color:#e2e8f0;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.esb-cancel{background:transparent;color:#94a3b8;border:1px solid #334155;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;transition:background .12s}
+.esb-cancel:hover{background:#1e293b;color:#cbd5e1}
+.esb-save{background:#22c55e;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;transition:background .12s}
+.esb-save:hover{background:#16a34a}
+
 /* LIVE INDICATOR */
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -407,6 +417,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 </div>
 <!-- hidden file input for mockup uploads -->
 <input type="file" id="mockup-file-input" accept="image/*" style="display:none" onchange="handleMockupUpload(this)"
+
+<!-- EDIT SAVE BAR -->
+<div id="edit-save-bar">
+  <span id="edit-save-label">Unsaved edits</span>
+  <button class="esb-cancel" onclick="cancelEdit()">Cancel</button>
+  <button class="esb-save" onclick="saveEdit()">Save</button>
+</div>
 
 <!-- CHANGELOG PANEL -->
 <div id="cl-panel">
@@ -798,7 +815,6 @@ seedIfEmpty();
 
 /* ─── Render weeks ─── */
 var allTouches=[];
-var editTimers={};
 
 function renderWeeks(touches){
   allTouches=touches.slice();
@@ -908,50 +924,76 @@ function attachRowButtons(){
   container.addEventListener('click',container._rowBtnListener);
 }
 
+/* ─── Edit save bar ─── */
+var _pendingEdits={};   /* { "id|field": {el, id, field, originalVal} } */
+var _editBarActive=false;
+
+function showEditBar(){
+  if(_editBarActive)return;
+  _editBarActive=true;
+  document.getElementById('edit-save-bar').classList.add('visible');
+}
+function hideEditBar(){
+  _editBarActive=false;
+  document.getElementById('edit-save-bar').classList.remove('visible');
+}
+function cancelEdit(){
+  /* Restore all pending fields to their original values */
+  Object.values(_pendingEdits).forEach(function(p){
+    p.el.innerText=p.originalVal;
+  });
+  _pendingEdits={};
+  hideEditBar();
+}
+function saveEdit(){
+  var entries=Object.values(_pendingEdits);
+  if(!entries.length){hideEditBar();return;}
+  if(!db){alert('Firebase not connected — cannot save in offline mode.');return;}
+  var promises=entries.map(function(p){
+    var rawVal=p.el.innerText.trim();
+    var val=p.field==='day'?rawVal.replace(/^Day\s*/i,'').trim():rawVal;
+    var originalVal=p.originalVal.replace(/^Day\s*/i,'').trim();
+    if(val===originalVal)return Promise.resolve();
+    var update={};
+    if(p.field==='day'){
+      var n=parseInt(val);
+      if(isNaN(n))return Promise.resolve();
+      update.day=n;
+    } else {
+      update[p.field]=rawVal;
+    }
+    update.lastEditBy=currentUser||'Anonymous';
+    update.lastEditAt=firebase.firestore.FieldValue.serverTimestamp();
+    var t=allTouches.find(function(x){return x.id===p.id;});
+    var touchTitle=t?t.title:'(unknown touch)';
+    var touchNum=t?('T'+t._num+': '):'';
+    var wgEdit=t?weekGroups.find(function(w){return t.day>=w.min&&t.day<=w.max;}):null;
+    var touchCtx=t?{num:t._num,day:t.day,week:wgEdit?wgEdit.label:'',title:t.title,type:t.type,trigger:t.trigger,tags:t.tags,conditional:!!t.conditional}:null;
+    return db.collection('touches').doc(p.id).update(update).then(function(){
+      logChange({type:'edit',touchId:p.id,touchLabel:touchNum+touchTitle.substring(0,60),field:p.field,oldValue:originalVal,newValue:val,touchContext:touchCtx});
+      p.el.dataset.original=rawVal;
+    });
+  });
+  Promise.all(promises).then(function(){
+    _pendingEdits={};
+    hideEditBar();
+    showToast('✓ Changes saved');
+  }).catch(function(e){console.warn('Save failed:',e);showToast('⚠ Save failed');});
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&_editBarActive)cancelEdit();});
+
 /* ─── Edit sync ─── */
 function attachEditListeners(){
   document.querySelectorAll('[contenteditable][data-id]').forEach(function(el){
-    /* Capture original value when user focuses the field */
     el.addEventListener('focus',function(){
-      if(!el.dataset.original)el.dataset.original=el.innerText.trim();
+      var key=el.getAttribute('data-id')+'|'+el.getAttribute('data-field');
+      /* Only capture original if this field isn't already pending */
+      if(!_pendingEdits[key])_pendingEdits[key]={el:el,id:el.getAttribute('data-id'),field:el.getAttribute('data-field'),originalVal:el.innerText.trim()};
     });
     el.addEventListener('input',function(){
-      var id=el.getAttribute('data-id');
-      var field=el.getAttribute('data-field');
-      clearTimeout(editTimers[id+field]);
-      editTimers[id+field]=setTimeout(function(){
-        var rawVal=el.innerText.trim();
-        var val=field==='day'?rawVal.replace(/^Day\s*/i,'').trim():rawVal;
-        var originalVal=(el.dataset.original||'').replace(/^Day\s*/i,'').trim();
-        /* Skip if nothing actually changed */
-        if(val===originalVal)return;
-        var update={};
-        if(field==='day'){
-          var n=parseInt(val);
-          if(!isNaN(n))update.day=n;
-          else return;
-        } else {
-          update[field]=rawVal;
-        }
-        update.lastEditBy=currentUser||'Anonymous';
-        if(db){
-          update.lastEditAt=firebase.firestore.FieldValue.serverTimestamp();
-          /* Find touch for changelog */
-          var t=allTouches.find(function(x){return x.id===id;});
-          var touchTitle=t?t.title:'(unknown touch)';
-          var touchNum=t?('T'+t._num+': '):'';
-          var wgEdit=t?weekGroups.find(function(w){return t.day>=w.min&&t.day<=w.max;}):null;
-          var touchCtx=t?{num:t._num,day:t.day,week:wgEdit?wgEdit.label:'',title:t.title,type:t.type,trigger:t.trigger,tags:t.tags,conditional:!!t.conditional}:null;
-          db.collection('touches').doc(id).update(update).then(function(){
-            logChange({type:'edit',touchId:id,touchLabel:touchNum+touchTitle.substring(0,60),field:field,oldValue:originalVal,newValue:val,touchContext:touchCtx});
-            el.dataset.original=rawVal; /* update baseline */
-          }).catch(function(e){console.warn('Edit save failed:',e);});
-        }
-      },800);
-    });
-    /* Clear original on blur so next focus re-captures */
-    el.addEventListener('blur',function(){
-      delete el.dataset.original;
+      var key=el.getAttribute('data-id')+'|'+el.getAttribute('data-field');
+      if(!_pendingEdits[key])_pendingEdits[key]={el:el,id:el.getAttribute('data-id'),field:el.getAttribute('data-field'),originalVal:el.innerText.trim()};
+      showEditBar();
     });
   });
 }
