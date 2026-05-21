@@ -317,6 +317,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .esb-save{background:#22c55e;color:#fff;border:none;border-radius:7px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;transition:background .12s}
 .esb-save:hover{background:#16a34a}
 
+/* EYE ICON STATES — preview button */
+.preview-btn.live{color:#22c55e!important;opacity:1!important}
+.preview-btn.has-mockup{color:#a78bfa;opacity:1!important}
+/* Mockup toolbar extras */
+#mockup-del-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);font-size:11px;font-weight:600;color:#fca5a5;cursor:pointer;transition:background .12s;flex-shrink:0}
+#mockup-del-btn:hover{background:rgba(239,68,68,.25);color:#fca5a5}
+#mockup-live-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);font-size:11px;font-weight:600;color:#cbd5e1;cursor:pointer;transition:all .12s;flex-shrink:0}
+#mockup-live-btn.live{background:rgba(34,197,94,.18);color:#4ade80;border-color:rgba(34,197,94,.4)}
+#mockup-live-btn:hover{background:rgba(255,255,255,.16)}
+/* Onboarding email rows with actions */
+.oe{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.oe:last-child{border-bottom:none}
+.oe-text{flex:1;font-size:11px;color:#475569}
+.oe-acts{display:flex;gap:2px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.oe:hover .oe-acts{opacity:1}
+.onb-preview-btn,.onb-upload-btn,.onb-cmt-btn{width:18px;height:18px;border-radius:4px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:9px;transition:background .12s,color .12s;padding:0}
+.onb-preview-btn:hover,.onb-upload-btn:hover{background:#ede9fe;color:#7c3aed}
+.onb-cmt-btn:hover{background:#ede9fe;color:#7c3aed}
+.onb-preview-btn.has-mockup{color:#a78bfa;opacity:1}
+.onb-preview-btn.live{color:#22c55e!important;opacity:1}
+/* Comment context badge */
+.cmt-ctx-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-bottom:5px;letter-spacing:.2px}
+.cmt-ctx-attachment{background:#fce7f3;color:#be185d}
+
 /* LIVE INDICATOR */
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -407,7 +431,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 <div id="mockup-overlay" onclick="if(event.target===this)closeMockup()">
   <div id="mockup-toolbar">
     <div id="mockup-modal-title">Email preview</div>
+    <button id="mockup-live-btn" onclick="toggleMockupLive()">○ Draft</button>
     <button id="mockup-cmt-btn" onclick="openMockupComments()">💬 Comments</button>
+    <button id="mockup-del-btn" onclick="deleteMockup()">🗑 Remove</button>
     <button id="mockup-modal-close" onclick="closeMockup()">✕</button>
   </div>
   <div id="mockup-upload-bar"><div id="mockup-upload-fill"></div></div>
@@ -515,12 +541,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 <!-- POST-ACTIVATION ONBOARDING -->
 <div class="sec">
   <div class="sec-hdr"><span class="stitle">Post-activation onboarding series <span style="font-size:11px;font-weight:400;color:#94a3b8">Triggered when customer activates each product</span></span><button class="week-comment-btn" id="cind-section-postactivation" onclick="openCmt('section-postactivation','Post-activation onboarding series')" style="font-size:11px;padding:4px 10px">💬 Comment on section</button></div>
-  <div class="ons-g">
-    <div class="oc"><div class="oh" style="background:#4d79f5">Checking + Debit<span style="opacity:.8;font-size:10px;font-weight:400">4</span></div><div class="ob"><div class="oc-cnt">HubSpot · on activation</div><div class="oe">Welcome + account walkthrough</div><div class="oe">Set up auto transfer</div><div class="oe">Issue your debit card</div><div class="oe">Move money: ACH + wire guide</div></div></div>
-    <div class="oc"><div class="oh" style="background:#3aabe0">Bill Pay<span style="opacity:.8;font-size:10px;font-weight:400">5</span></div><div class="ob"><div class="oc-cnt">HubSpot · on activation</div><div class="oe">Welcome + Bill Pay overview</div><div class="oe">Set up approval rules</div><div class="oe">Schedule recurring payments</div><div class="oe">Bulk vendor upload</div><div class="oe">Same-day ACH guide</div></div></div>
-    <div class="oc"><div class="oh" style="background:#0eaa8f">Credit Cards<span style="opacity:.8;font-size:10px;font-weight:400">3</span></div><div class="ob"><div class="oc-cnt">HubSpot · on activation</div><div class="oe">Card limits + benefits overview</div><div class="oe">Cashback mechanics + redemption</div><div class="oe">Issue team cards</div></div></div>
-    <div class="oc"><div class="oh" style="background:#0fb5c9">Reimbursements<span style="opacity:.8;font-size:10px;font-weight:400">3</span></div><div class="ob"><div class="oc-cnt">HubSpot · on activation</div><div class="oe">Set up reimbursement policy</div><div class="oe">Employee submission guide</div><div class="oe">Admin approval + payout flow</div></div></div>
-    <div class="oc"><div class="oh" style="background:#22c55e">Treasury<span style="opacity:.8;font-size:10px;font-weight:400">2</span></div><div class="ob"><div class="oc-cnt">HubSpot · on activation</div><div class="oe">Fund your Treasury + yield tiers</div><div class="oe">Timing, payouts + liquidity guide</div></div></div>
+  <div id="onb-container" class="ons-g">
+    <div style="grid-column:1/-1;text-align:center;padding:24px;font-size:12px;color:#94a3b8">Loading…</div>
   </div>
 </div>
 
@@ -896,7 +918,7 @@ function renderTouchRow(t){
     +'<div class="em-tags">'+tagHtml+'</div>'
     +'<div class="em-row-acts">'
     +(getMockupUrl(t)
-      ?'<button class="preview-btn has-mockup" data-id="'+t.id+'" data-title="'+escHtml('T'+t._num+': '+t.title.substring(0,40))+'" title="View email mockup">🖼</button>'
+      ?'<button class="preview-btn has-mockup'+(t.live?' live':'')+'" data-id="'+t.id+'" data-title="'+escHtml('T'+t._num+': '+t.title.substring(0,40))+'" title="'+(t.live?'● Live':'○ Draft')+' — View mockup">'+eyeSvg()+'</button>'
       :'<button class="upload-btn" data-id="'+t.id+'" title="Upload email mockup">📎</button>')
     +'<button class="cmt-btn" id="cind-touch-'+t.id+'" data-id="'+t.id+'" data-title="'+escHtml('T'+t._num+': '+t.title.substring(0,40))+'" title="Comments">💬</button>'
     +'<button class="del-btn" data-id="'+t.id+'" title="Remove touch">🗑</button>'
@@ -1082,6 +1104,7 @@ function toggleWk(hdr,wi){
 /* ─── Comment panel ─── */
 var cmtTargetId='';
 var cmtUnsub=null;
+var _cmtFromMockup=false;
 function openCmt(targetId,label){
   cmtTargetId=targetId;
   document.getElementById('cmt-panel-title').textContent='💬 '+(label||targetId);
@@ -1093,6 +1116,12 @@ function openCmt(targetId,label){
 function closeCmtPanel(){
   document.getElementById('cmt-panel').classList.remove('open');
   document.getElementById('cmt-overlay').style.display='none';
+  /* Reset z-index in case it was elevated above the mockup */
+  var panel=document.getElementById('cmt-panel');
+  var overlay=document.getElementById('cmt-overlay');
+  if(panel)panel.style.zIndex='';
+  if(overlay)overlay.style.zIndex='';
+  _cmtFromMockup=false;
   if(cmtUnsub){cmtUnsub();cmtUnsub=null;}
   document.getElementById('cmt-list').innerHTML='<div style="text-align:center;padding:24px;font-size:12px;color:#94a3b8">No comments yet — add the first one below.</div>';
 }
@@ -1133,7 +1162,8 @@ function renderComments(comments){
     }).join('');
     var replySection='<div class="cmt-replies">'+replies+'<div class="reply-input-row"><input class="reply-input" placeholder="Reply…" id="ri-'+c.fsId+'" onkeydown="if(event.key===\'Enter\')sendReply(\''+c.fsId+'\')"><button class="reply-send" onclick="sendReply(\''+c.fsId+'\')">↵</button></div></div>';
     var deleteBtn='<button class="cmt-action-btn" onclick="deleteComment(\''+c.fsId+'\')" title="Delete comment" style="margin-left:auto;color:#ef4444">🗑 Delete</button>';
-    return '<div class="cmt-card'+(c.resolved?' resolved':'')+'"><div class="cmt-meta"><div class="cmt-avatar">'+initials(c.author)+'</div><div class="cmt-author">'+escHtml(c.author||'Anonymous')+'</div><div class="cmt-time">'+ts+'</div></div><div class="cmt-text">'+escHtml(c.text)+'</div><div class="cmt-actions">'+resolvedHtml+deleteBtn+'</div>'+replySection+'</div>';
+    var ctxBadge=c.context==='attachment'?'<div class="cmt-ctx-badge cmt-ctx-attachment">📎 Attachment comment</div>':'';
+    return '<div class="cmt-card'+(c.resolved?' resolved':'')+'">'+ctxBadge+'<div class="cmt-meta"><div class="cmt-avatar">'+initials(c.author)+'</div><div class="cmt-author">'+escHtml(c.author||'Anonymous')+'</div><div class="cmt-time">'+ts+'</div></div><div class="cmt-text">'+escHtml(c.text)+'</div><div class="cmt-actions">'+resolvedHtml+deleteBtn+'</div>'+replySection+'</div>';
   }).join('');
   list.scrollTop=list.scrollHeight;
 }
@@ -1141,10 +1171,14 @@ function sendComment(){
   var txt=document.getElementById('cmt-input').value.trim();
   if(!txt)return;
   if(!db){alert('Firebase not connected — comments require the Vercel-hosted version.');return;}
-  db.collection('comments').add({
+  var doc={
     targetId:cmtTargetId,author:currentUser||'Anonymous',text:txt,
     resolved:false,replies:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  }).then(function(){document.getElementById('cmt-input').value='';}).catch(function(e){alert('Could not post comment: '+e.message);});
+  };
+  if(_cmtFromMockup)doc.context='attachment';
+  db.collection('comments').add(doc)
+    .then(function(){document.getElementById('cmt-input').value='';})
+    .catch(function(e){alert('Could not post comment: '+e.message);});
 }
 function sendReply(cmtId){
   var inp=document.getElementById('ri-'+cmtId);
@@ -1167,48 +1201,141 @@ function deleteComment(cmtId){
 }
 document.getElementById('cmt-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendComment();}});
 
+/* ─── Eye icon SVG ─── */
+function eyeSvg(){
+  return '<svg width="14" height="10" viewBox="0 0 20 14" fill="none" style="display:block;flex-shrink:0"><ellipse cx="10" cy="7" rx="9" ry="6" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="7" r="2.8" stroke="currentColor" stroke-width="1.8"/></svg>';
+}
+
 /* ─── Mockup previews ─── */
 var mockupMap={
   't2':'designs/ai-cfo-1.png',
   't5':'designs/ai-cfo-2.png',
   't8':'designs/ai-cfo-3.png'
 };
-var _mockupTouchId=null;
+var _mockupTouchId=null;   /* active touch ID or onb email ID */
+var _mockupMode='touch';   /* 'touch' | 'onb' */
 var _uploadTargetId=null;
+var _uploadMode='touch';   /* 'touch' | 'onb' */
 
 function getMockupUrl(t){
-  /* Prefer a Firebase-stored URL on the touch doc, fall back to static map */
+  /* Empty string '' means explicitly deleted */
+  if(t&&t.mockupUrl==='')return null;
   return (t&&t.mockupUrl)||mockupMap[t&&t.id]||null;
 }
 
-function openMockup(id,title){
-  var t=allTouches.find(function(x){return x.id===id;});
-  var url=getMockupUrl(t);
+function openMockup(id,title,mode){
+  mode=mode||'touch';
+  var url=null;
+  var isLive=false;
+  if(mode==='touch'){
+    var t=allTouches.find(function(x){return x.id===id;});
+    url=getMockupUrl(t);
+    isLive=!!(t&&t.live);
+  } else {
+    var d=onbEmailData[id]||{};
+    url=d.mockupUrl||null;
+    isLive=!!d.live;
+  }
   if(!url)return;
   _mockupTouchId=id;
-  var img=document.getElementById('mockup-img');
-  img.src=url;
+  _mockupMode=mode;
+  document.getElementById('mockup-img').src=url;
   document.getElementById('mockup-modal-title').textContent=title||'Email preview';
   document.getElementById('mockup-img-wrap').scrollTop=0;
+  /* Update live button */
+  updateMockupLiveBtn(isLive);
   document.getElementById('mockup-overlay').classList.add('open');
+}
+
+function updateMockupLiveBtn(isLive){
+  var btn=document.getElementById('mockup-live-btn');
+  if(!btn)return;
+  if(isLive){btn.textContent='● Live';btn.classList.add('live');}
+  else{btn.textContent='○ Draft';btn.classList.remove('live');}
 }
 
 function closeMockup(){
   document.getElementById('mockup-overlay').classList.remove('open');
   document.getElementById('mockup-img').src='';
   _mockupTouchId=null;
+  /* Reset comment panel z-index in case it was elevated */
+  var panel=document.getElementById('cmt-panel');
+  var overlay=document.getElementById('cmt-overlay');
+  if(panel)panel.style.zIndex='';
+  if(overlay)overlay.style.zIndex='';
+}
+
+function deleteMockup(){
+  if(!_mockupTouchId)return;
+  if(!confirm('Remove this attached mockup? The image will be detached but not deleted from storage.'))return;
+  if(!db){alert('Firebase not connected.');return;}
+  if(_mockupMode==='touch'){
+    db.collection('touches').doc(_mockupTouchId).update({mockupUrl:''}).then(function(){
+      var t=allTouches.find(function(x){return x.id===_mockupTouchId;});
+      if(t)t.mockupUrl='';
+      /* Also clear from static map so it doesn't re-appear */
+      delete mockupMap[_mockupTouchId];
+      showToast('✓ Mockup removed');
+      closeMockup();
+    }).catch(function(e){alert('Remove failed: '+e.message);});
+  } else {
+    db.collection('onb_emails').doc(_mockupTouchId).set({mockupUrl:'',live:false},{merge:true}).then(function(){
+      if(!onbEmailData[_mockupTouchId])onbEmailData[_mockupTouchId]={};
+      onbEmailData[_mockupTouchId].mockupUrl='';
+      onbEmailData[_mockupTouchId].live=false;
+      showToast('✓ Mockup removed');
+      closeMockup();
+      renderOnboarding();
+    }).catch(function(e){alert('Remove failed: '+e.message);});
+  }
+}
+
+function toggleMockupLive(){
+  if(!_mockupTouchId||!db)return;
+  if(_mockupMode==='touch'){
+    var t=allTouches.find(function(x){return x.id===_mockupTouchId;});
+    var newLive=!(t&&t.live);
+    db.collection('touches').doc(_mockupTouchId).update({live:newLive}).then(function(){
+      if(t)t.live=newLive;
+      updateMockupLiveBtn(newLive);
+      showToast(newLive?'✓ Marked as Live':'✓ Marked as Draft');
+    }).catch(function(e){alert('Update failed: '+e.message);});
+  } else {
+    var d=onbEmailData[_mockupTouchId]||{};
+    var newLive=!d.live;
+    db.collection('onb_emails').doc(_mockupTouchId).set({live:newLive},{merge:true}).then(function(){
+      if(!onbEmailData[_mockupTouchId])onbEmailData[_mockupTouchId]={};
+      onbEmailData[_mockupTouchId].live=newLive;
+      updateMockupLiveBtn(newLive);
+      renderOnboarding();
+      showToast(newLive?'✓ Marked as Live':'✓ Marked as Draft');
+    }).catch(function(e){alert('Update failed: '+e.message);});
+  }
 }
 
 function openMockupComments(){
   if(!_mockupTouchId)return;
-  var t=allTouches.find(function(x){return x.id===_mockupTouchId;});
-  var label=t?('T'+t._num+': '+t.title.substring(0,40)):'Email';
-  closeMockup();
-  openCmt('touch-'+_mockupTouchId,label);
+  var targetId,label;
+  if(_mockupMode==='touch'){
+    var t=allTouches.find(function(x){return x.id===_mockupTouchId;});
+    label='📎 '+(t?('T'+t._num+': '+t.title.substring(0,35)):'Email mockup');
+    targetId='mockup-'+_mockupTouchId;
+  } else {
+    label='📎 '+_mockupTouchId;
+    targetId='mockup-onb-'+_mockupTouchId;
+  }
+  /* Keep mockup open — elevate cmt panel above the overlay */
+  var panel=document.getElementById('cmt-panel');
+  var overlay=document.getElementById('cmt-overlay');
+  if(panel)panel.style.zIndex='1600';
+  if(overlay){overlay.style.zIndex='1599';overlay.style.display='block';}
+  _cmtFromMockup=true;
+  openCmt(targetId,label);
 }
 
-function triggerMockupUpload(id){
+function triggerMockupUpload(id,mode){
   _uploadTargetId=id;
+  _uploadMode=mode||'touch';
   var inp=document.getElementById('mockup-file-input');
   inp.value='';
   inp.click();
@@ -1216,6 +1343,7 @@ function triggerMockupUpload(id){
 
 function handleMockupUpload(inp){
   var id=_uploadTargetId;
+  var mode=_uploadMode||'touch';
   if(!id||!inp.files.length)return;
   if(!storage||!db){alert('Firebase not connected — upload unavailable.');return;}
   var file=inp.files[0];
@@ -1224,7 +1352,8 @@ function handleMockupUpload(inp){
   var fill=document.getElementById('mockup-upload-fill');
   bar.style.display='block';
   fill.style.width='0%';
-  var ref=storage.ref('mockups/'+id+'-'+Date.now()+'.png');
+  var storePath=(mode==='onb'?'onb-mockups/':'mockups/')+id+'-'+Date.now()+'.png';
+  var ref=storage.ref(storePath);
   var task=ref.put(file);
   task.on('state_changed',
     function(snap){fill.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%';},
@@ -1233,18 +1362,98 @@ function handleMockupUpload(inp){
       task.snapshot.ref.getDownloadURL().then(function(url){
         bar.style.display='none';
         fill.style.width='0%';
-        db.collection('touches').doc(id).update({mockupUrl:url}).then(function(){
-          showToast('✓ Mockup uploaded');
-          /* update local cache so preview icon appears immediately */
-          var t=allTouches.find(function(x){return x.id===id;});
-          if(t)t.mockupUrl=url;
-          /* open the lightbox straight away */
-          var t2=allTouches.find(function(x){return x.id===id;});
-          openMockup(id,t2?('T'+t2._num+': '+t2.title.substring(0,40)):'Email preview');
-        });
+        if(mode==='onb'){
+          db.collection('onb_emails').doc(id).set({mockupUrl:url},{merge:true}).then(function(){
+            showToast('✓ Mockup uploaded');
+            if(!onbEmailData[id])onbEmailData[id]={};
+            onbEmailData[id].mockupUrl=url;
+            renderOnboarding();
+            openMockup(id,id,mode);
+          });
+        } else {
+          db.collection('touches').doc(id).update({mockupUrl:url}).then(function(){
+            showToast('✓ Mockup uploaded');
+            var t=allTouches.find(function(x){return x.id===id;});
+            if(t)t.mockupUrl=url;
+            openMockup(id,t?('T'+t._num+': '+t.title.substring(0,40)):'Email preview','touch');
+          });
+        }
       });
     }
   );
+}
+
+/* ─── Post-activation onboarding ─── */
+var onbProducts=[
+  {id:'checking',label:'Checking + Debit',color:'#4d79f5',sub:'HubSpot · on activation',emails:['Welcome + account walkthrough','Set up auto transfer','Issue your debit card','Move money: ACH + wire guide']},
+  {id:'billpay',label:'Bill Pay',color:'#3aabe0',sub:'HubSpot · on activation',emails:['Welcome + Bill Pay overview','Set up approval rules','Schedule recurring payments','Bulk vendor upload','Same-day ACH guide']},
+  {id:'credit',label:'Credit Cards',color:'#0eaa8f',sub:'HubSpot · on activation',emails:['Card limits + benefits overview','Cashback mechanics + redemption','Issue team cards']},
+  {id:'reimb',label:'Reimbursements',color:'#0fb5c9',sub:'HubSpot · on activation',emails:['Set up reimbursement policy','Employee submission guide','Admin approval + payout flow']},
+  {id:'treasury',label:'Treasury',color:'#22c55e',sub:'HubSpot · on activation',emails:['Fund your Treasury + yield tiers','Timing, payouts + liquidity guide']}
+];
+var onbEmailData={};  /* { 'checking-0': {mockupUrl:'...', live:false} } */
+
+function renderOnboarding(){
+  var container=document.getElementById('onb-container');
+  if(!container)return;
+  var html='';
+  onbProducts.forEach(function(p){
+    html+='<div class="oc">';
+    html+='<div class="oh" style="background:'+p.color+'">'+escHtml(p.label)+'<span style="opacity:.8;font-size:10px;font-weight:400">'+p.emails.length+'</span></div>';
+    html+='<div class="ob"><div class="oc-cnt">'+escHtml(p.sub)+'</div>';
+    p.emails.forEach(function(email,idx){
+      var onbId=p.id+'-'+idx;
+      var d=onbEmailData[onbId]||{};
+      var hasUrl=!!(d.mockupUrl&&d.mockupUrl!=='');
+      var isLive=!!d.live;
+      var eyeBtn=hasUrl
+        ?'<button class="onb-preview-btn has-mockup'+(isLive?' live':'')+'" data-onb-id="'+onbId+'" title="'+(isLive?'● Live':'○ Draft')+' — View mockup">'+eyeSvg()+'</button>'
+        :'<button class="onb-upload-btn" data-onb-id="'+onbId+'" title="Upload email mockup">📎</button>';
+      html+='<div class="oe">'
+        +'<span class="oe-text">'+escHtml(email)+'</span>'
+        +'<div class="oe-acts">'
+        +eyeBtn
+        +'<button class="onb-cmt-btn" data-onb-id="'+onbId+'" data-title="'+escHtml(p.label+': '+email.substring(0,30))+'" title="Comments">💬</button>'
+        +'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+  });
+  container.innerHTML=html;
+  attachOnbButtons();
+}
+
+function attachOnbButtons(){
+  var container=document.getElementById('onb-container');
+  if(!container)return;
+  if(container._onbListener)container.removeEventListener('click',container._onbListener);
+  container._onbListener=function(e){
+    var btn=e.target.closest('button');
+    if(!btn)return;
+    var onbId=btn.dataset.onbId;
+    if(!onbId)return;
+    var d=onbEmailData[onbId]||{};
+    if(btn.classList.contains('onb-preview-btn')){
+      openMockup(onbId,btn.dataset.title||onbId,'onb');
+    } else if(btn.classList.contains('onb-upload-btn')){
+      triggerMockupUpload(onbId,'onb');
+    } else if(btn.classList.contains('onb-cmt-btn')){
+      openCmt('onb-'+onbId,btn.dataset.title||onbId);
+    }
+  };
+  container.addEventListener('click',container._onbListener);
+}
+
+function loadOnbData(){
+  if(!db)return;
+  db.collection('onb_emails').onSnapshot(function(snap){
+    onbEmailData={};
+    snap.docs.forEach(function(d){onbEmailData[d.id]=d.data();});
+    renderOnboarding();
+  },function(e){
+    console.warn('onb_emails load error:',e);
+    renderOnboarding();
+  });
 }
 
 /* ─── Changelog ─── */
@@ -1492,9 +1701,11 @@ if(db){
     renderWeeks(SEED);
     document.getElementById('live-bar').innerHTML='<span style="color:#ef4444">⚠ Firestore permission denied. Go to Firebase Console → Firestore → Rules and set allow read, write: if true; — then reload.</span>';
   });
+  loadOnbData();
 }else{
   /* No Firebase at all — render from seed so everything is still visible */
   renderWeeks(SEED);
+  renderOnboarding();
 }
 
 /* ─── Activity dropdown ─── */
