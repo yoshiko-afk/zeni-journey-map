@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0f172a;background:#fff;padding:40px 48px;max-width:1200px;margin:0 auto;line-height:1.5}
@@ -341,6 +342,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .cmt-ctx-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;margin-bottom:5px;letter-spacing:.2px}
 .cmt-ctx-attachment{background:#fce7f3;color:#be185d}
 
+/* VIEW-ONLY MODE — applied via body.view-only */
+body.view-only [contenteditable]{cursor:default;pointer-events:none}
+body.view-only .del-btn,
+body.view-only .upload-btn,
+body.view-only .add-touch-btn,
+body.view-only .onb-upload-btn,
+body.view-only #edit-save-bar{display:none!important}
+body.view-only .em-row-acts{opacity:0.35;pointer-events:none}
+body.view-only .oe-acts .onb-upload-btn{display:none!important}
+
+/* USER BADGE + MENU */
+#user-wrap{position:relative}
+#user-badge{cursor:pointer}
+#view-only-pill{font-size:9px;font-weight:700;background:#f1f5f9;color:#94a3b8;padding:2px 7px;border-radius:8px;margin-left:4px;letter-spacing:.4px;display:none}
+#user-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:9px;box-shadow:0 4px 16px rgba(0,0,0,.12);overflow:hidden;min-width:200px;z-index:1100}
+#user-menu.open{display:block}
+#um-email{padding:8px 14px 4px;font-size:10px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ALLOWLIST MODAL */
+#al-modal{position:fixed;inset:0;z-index:2000;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center}
+#al-modal.open{display:flex}
+#al-box{background:#fff;border-radius:14px;padding:28px;width:420px;max-width:95vw;box-shadow:0 12px 48px rgba(0,0,0,.18)}
+#al-box h2{font-size:16px;font-weight:700;margin-bottom:4px;color:#0f172a}
+#al-box .al-sub{font-size:12px;color:#64748b;margin-bottom:16px}
+#al-list{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;max-height:220px;overflow-y:auto}
+.al-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid rgba(0,0,0,.08);border-radius:7px;font-size:12px;color:#334155}
+.al-row .al-email{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.al-row .al-you{font-size:9px;background:#ede9fe;color:#7c3aed;padding:1px 6px;border-radius:8px;font-weight:700}
+.al-row .al-remove{background:none;border:none;color:#ef4444;cursor:pointer;font-size:11px;padding:2px 6px;border-radius:4px}
+.al-row .al-remove:hover{background:#fef2f2}
+.al-add-row{display:flex;gap:6px}
+#al-input{flex:1;border:1.5px solid rgba(0,0,0,.13);border-radius:7px;padding:8px 10px;font-size:12px;font-family:inherit;outline:none;color:#0f172a}
+#al-input:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.1)}
+#al-add-btn{background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+#al-add-btn:hover{background:#6d28d9}
+#al-done{margin-top:14px;width:100%;background:#f1f5f9;color:#475569;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:600;cursor:pointer}
+#al-done:hover{background:#e2e8f0}
+
 /* LIVE INDICATOR */
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:5px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -444,6 +483,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 <!-- hidden file input for mockup uploads -->
 <input type="file" id="mockup-file-input" accept="image/*" style="display:none" onchange="handleMockupUpload(this)"
 
+<!-- ALLOWLIST MODAL -->
+<div id="al-modal">
+  <div id="al-box">
+    <h2>Manage editors</h2>
+    <div class="al-sub">These email addresses can edit the journey map. Viewers with any other email can see the map but cannot make changes.</div>
+    <div id="al-list"></div>
+    <div class="al-add-row">
+      <input id="al-input" type="email" placeholder="name@zeni.ai" onkeydown="if(event.key==='Enter')addToAllowlist()">
+      <button id="al-add-btn" onclick="addToAllowlist()">Add editor</button>
+    </div>
+    <button id="al-done" onclick="closeAllowlistModal()">Done</button>
+  </div>
+</div>
+
 <!-- EDIT SAVE BAR -->
 <div id="edit-save-bar">
   <span id="edit-save-label">Unsaved edits</span>
@@ -462,10 +515,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 
 
 <div id="top-bar-right">
-  <!-- USER BADGE -->
-  <div id="user-badge" onclick="changeName()">
-    <div class="ub-dot"></div>
-    <span id="badge-name">You</span>
+  <!-- USER BADGE + MENU -->
+  <div id="user-wrap">
+    <div id="user-badge" onclick="toggleUserMenu(event)">
+      <div class="ub-dot" id="ub-dot" style="background:#94a3b8"></div>
+      <span id="badge-name">Sign in to edit</span>
+      <span id="view-only-pill">VIEW ONLY</span>
+    </div>
+    <div id="user-menu">
+      <div id="um-email"></div>
+      <div class="sm-item" id="um-manage" onclick="openAllowlistModal();closeUserMenu()" style="display:none">👥 Manage editors</div>
+      <div class="sm-sep"></div>
+      <div class="sm-item" onclick="signOutUser();closeUserMenu()">Sign out</div>
+    </div>
   </div>
   <!-- ACTIVITY DROPDOWN -->
   <div id="save-wrap">
@@ -619,25 +681,142 @@ try{
   document.getElementById('live-bar').innerHTML='<span style="color:#f59e0b">⚠ Firebase offline — showing preview data. Deploy to Vercel for live collaboration.</span>';
 }
 
-/* ─── User ─── */
-var currentUser=localStorage.getItem('zeni_username')||'';
-function submitName(){
-  var v=document.getElementById('name-input').value.trim();
-  if(!v)return;
-  currentUser=v;
-  localStorage.setItem('zeni_username',v);
-  document.getElementById('badge-name').textContent=v;
+/* ─── Auth + allowlist ─── */
+var currentUser='';
+var currentUserEmail='';
+var _isEditor=false;
+var _allowlistEmails=[];
+
+function setReadOnly(ro){
+  _isEditor=!ro;
+  document.body.classList.toggle('view-only',ro);
+  var dot=document.getElementById('ub-dot');
+  if(dot)dot.style.background=_isEditor?'#a78bfa':'#94a3b8';
+  var pill=document.getElementById('view-only-pill');
+  if(pill)pill.style.display=(ro&&currentUserEmail)?'inline':'none';
+  var manage=document.getElementById('um-manage');
+  if(manage)manage.style.display=_isEditor?'flex':'none';
+}
+
+function checkAllowlist(email){
+  if(!db){setReadOnly(false);return;}
+  db.collection('config').doc('allowlist').get().then(function(doc){
+    _allowlistEmails=doc.exists?(doc.data().emails||[]):[];
+    var isEd=_allowlistEmails.some(function(e){return e.toLowerCase()===email.toLowerCase();});
+    setReadOnly(!isEd);
+    if(!isEd)showToast('View-only mode — your email isn\'t on the editor list yet.');
+  }).catch(function(){setReadOnly(true);});
+}
+
+function signInWithGoogle(){
+  if(typeof firebase==='undefined'||!firebase.auth)return;
+  var provider=new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(function(e){
+    if(e.code!=='auth/popup-closed-by-user')alert('Sign-in failed: '+e.message);
+  });
+}
+function signOutUser(){
+  if(typeof firebase==='undefined'||!firebase.auth)return;
+  firebase.auth().signOut().then(function(){
+    currentUser='';currentUserEmail='';_isEditor=false;_allowlistEmails=[];
+    document.getElementById('badge-name').textContent='Sign in to edit';
+    document.getElementById('ub-dot').style.background='#94a3b8';
+    document.getElementById('view-only-pill').style.display='none';
+    setReadOnly(true);
+    showToast('Signed out.');
+  });
+}
+
+function toggleUserMenu(e){
+  e.stopPropagation();
+  if(!currentUserEmail){signInWithGoogle();return;}
+  var m=document.getElementById('user-menu');
+  m.classList.toggle('open');
+}
+function closeUserMenu(){document.getElementById('user-menu').classList.remove('open');}
+document.addEventListener('click',function(e){
+  var w=document.getElementById('user-wrap');
+  if(w&&!w.contains(e.target))closeUserMenu();
+});
+
+/* Allowlist management */
+function openAllowlistModal(){
+  if(!_isEditor){alert('Only editors can manage the allowlist.');return;}
+  renderAllowlistModal();
+  document.getElementById('al-modal').classList.add('open');
+}
+function closeAllowlistModal(){document.getElementById('al-modal').classList.remove('open');}
+document.getElementById('al-modal').addEventListener('click',function(e){if(e.target===this)closeAllowlistModal();});
+
+function renderAllowlistModal(){
+  var list=document.getElementById('al-list');
+  if(!_allowlistEmails.length){list.innerHTML='<div style="text-align:center;padding:16px;font-size:12px;color:#94a3b8">No editors yet.</div>';return;}
+  list.innerHTML=_allowlistEmails.map(function(em){
+    var isMe=em.toLowerCase()===currentUserEmail.toLowerCase();
+    return '<div class="al-row"><span class="al-email">'+escHtml(em)+'</span>'
+      +(isMe?'<span class="al-you">you</span>':'')
+      +'<button class="al-remove" onclick="removeFromAllowlist(\''+escHtml(em)+'\')">✕ Remove</button></div>';
+  }).join('');
+}
+
+function saveAllowlist(){
+  if(!db)return;
+  return db.collection('config').doc('allowlist').set({emails:_allowlistEmails},{merge:false})
+    .then(function(){renderAllowlistModal();showToast('✓ Editor list saved');})
+    .catch(function(e){alert('Could not save: '+e.message);});
+}
+
+function addToAllowlist(){
+  var inp=document.getElementById('al-input');
+  var email=(inp.value||'').trim().toLowerCase();
+  if(!email||!email.includes('@')){alert('Enter a valid email.');return;}
+  if(_allowlistEmails.some(function(e){return e.toLowerCase()===email;})){alert('Already on the list.');inp.value='';return;}
+  _allowlistEmails.push(email);
+  inp.value='';
+  saveAllowlist();
+}
+function removeFromAllowlist(email){
+  if(email.toLowerCase()===currentUserEmail.toLowerCase()&&!confirm('Remove yourself? You will lose edit access immediately.')){return;}
+  _allowlistEmails=_allowlistEmails.filter(function(e){return e.toLowerCase()!==email.toLowerCase();});
+  saveAllowlist();
+  /* If we removed ourselves, go read-only */
+  if(email.toLowerCase()===currentUserEmail.toLowerCase())setReadOnly(true);
+}
+
+/* Auth state listener */
+if(typeof firebase!=='undefined'&&firebase.auth){
+  /* Hide name modal — auth replaces it */
   document.getElementById('name-modal').style.display='none';
+  firebase.auth().onAuthStateChanged(function(user){
+    if(user){
+      currentUser=user.displayName||user.email;
+      currentUserEmail=user.email;
+      document.getElementById('badge-name').textContent=currentUser;
+      document.getElementById('um-email').textContent=user.email;
+      document.getElementById('name-modal').style.display='none';
+      checkAllowlist(user.email);
+    } else {
+      currentUser='';currentUserEmail='';
+      document.getElementById('badge-name').textContent='Sign in to edit';
+      document.getElementById('um-email').textContent='';
+      document.getElementById('ub-dot').style.background='#94a3b8';
+      document.getElementById('view-only-pill').style.display='none';
+      setReadOnly(true);
+    }
+  });
+} else {
+  /* No auth SDK — fall back to name prompt */
+  currentUser=localStorage.getItem('zeni_username')||'';
+  if(currentUser){
+    document.getElementById('badge-name').textContent=currentUser;
+    document.getElementById('name-modal').style.display='none';
+  }
+  setReadOnly(false);
 }
-function changeName(){
-  var n=prompt('Change your display name:',currentUser);
-  if(n&&n.trim()){currentUser=n.trim();localStorage.setItem('zeni_username',currentUser);document.getElementById('badge-name').textContent=currentUser;}
-}
+
+/* Legacy stubs (called nowhere now but kept for safety) */
+function submitName(){var v=document.getElementById('name-input').value.trim();if(!v)return;currentUser=v;localStorage.setItem('zeni_username',v);document.getElementById('badge-name').textContent=v;document.getElementById('name-modal').style.display='none';}
 document.getElementById('name-input').addEventListener('keydown',function(e){if(e.key==='Enter')submitName();});
-if(currentUser){
-  document.getElementById('badge-name').textContent=currentUser;
-  document.getElementById('name-modal').style.display='none';
-}
 
 /* ─── Gantt (static) ─── */
 var wks=['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12','W13'];
@@ -951,6 +1130,7 @@ var _pendingEdits={};   /* { "id|field": {el, id, field, originalVal} } */
 var _editBarActive=false;
 
 function showEditBar(){
+  if(!_isEditor)return;
   if(_editBarActive)return;
   _editBarActive=true;
   document.getElementById('edit-save-bar').classList.add('visible');

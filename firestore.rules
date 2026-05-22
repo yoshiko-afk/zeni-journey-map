@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if the requesting user is on the allowlist
+    function isEditor() {
+      return request.auth != null &&
+        request.auth.token.email in
+          get(/databases/$(database)/documents/config/allowlist).data.emails;
+    }
+
+    // ── Read: anyone can view the map ──────────────────────────────────────
+    match /{document=**} {
+      allow read: if true;
+    }
+
+    // ── Allowlist doc: any signed-in user can create it the first time;
+    //    only existing editors can update or delete it ─────────────────────
+    match /config/allowlist {
+      allow create: if request.auth != null;
+      allow update, delete: if isEditor();
+    }
+
+    // ── All other collections: only allowlisted editors can write ──────────
+    match /touches/{doc} {
+      allow write: if isEditor();
+    }
+    match /comments/{doc} {
+      allow write: if isEditor();
+    }
+    match /changelog/{doc} {
+      allow write: if isEditor();
+    }
+    match /onb_emails/{doc} {
+      allow write: if isEditor();
+    }
+    match /config/{doc} {
+      allow write: if isEditor();
+    }
+  }
+}
