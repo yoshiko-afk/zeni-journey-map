@@ -1390,6 +1390,10 @@ function deleteComment(cmtId){
 }
 document.getElementById('cmt-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendComment();}});
 
+/* ─── Cloudinary config ─── */
+var CLOUDINARY_CLOUD='pzv9sghc';
+var CLOUDINARY_PRESET='dm6fq8bqg';
+
 /* ─── Eye icon SVG ─── */
 function eyeSvg(){
   return '<svg width="14" height="10" viewBox="0 0 20 14" fill="none" style="display:block;flex-shrink:0"><ellipse cx="10" cy="7" rx="9" ry="6" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="7" r="2.8" stroke="currentColor" stroke-width="1.8"/></svg>';
@@ -1541,42 +1545,43 @@ function handleMockupUpload(inp){
   var id=_uploadTargetId;
   var mode=_uploadMode||'touch';
   if(!id||!inp.files.length)return;
-  if(!storage||!db){alert('Firebase not connected — upload unavailable.');return;}
+  if(!db){alert('Firebase not connected — cannot save mockup.');return;}
   var file=inp.files[0];
   if(!file.type.startsWith('image/')){alert('Please select an image file.');return;}
   var bar=document.getElementById('mockup-upload-bar');
   var fill=document.getElementById('mockup-upload-fill');
   bar.style.display='block';
   fill.style.width='0%';
-  var storePath=(mode==='onb'?'onb-mockups/':'mockups/')+id+'-'+Date.now()+'.png';
-  var ref=storage.ref(storePath);
-  var task=ref.put(file);
-  task.on('state_changed',
-    function(snap){fill.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%';},
-    function(err){bar.style.display='none';alert('Upload failed: '+err.message);},
-    function(){
-      task.snapshot.ref.getDownloadURL().then(function(url){
-        bar.style.display='none';
-        fill.style.width='0%';
-        if(mode==='onb'){
-          db.collection('onb_emails').doc(id).set({mockupUrl:url},{merge:true}).then(function(){
-            showToast('✓ Mockup uploaded');
-            if(!onbEmailData[id])onbEmailData[id]={};
-            onbEmailData[id].mockupUrl=url;
-            renderOnboarding();
-            openMockup(id,id,mode);
-          }).catch(function(e){alert('Saved to storage but could not update record: '+e.message);});
-        } else {
-          db.collection('touches').doc(id).update({mockupUrl:url}).then(function(){
-            showToast('✓ Mockup uploaded');
-            var t=allTouches.find(function(x){return x.id===id;});
-            if(t)t.mockupUrl=url;
-            openMockup(id,t?('T'+t._num+': '+t.title.substring(0,40)):'Email preview','touch');
-          }).catch(function(e){alert('Saved to storage but could not update record: '+e.message);});
-        }
-      }).catch(function(e){bar.style.display='none';alert('Upload failed — could not get file URL: '+e.message);});
+  /* Upload to Cloudinary (unsigned) */
+  var fd=new FormData();
+  fd.append('file',file);
+  fd.append('upload_preset',CLOUDINARY_PRESET);
+  var xhr=new XMLHttpRequest();
+  xhr.open('POST','https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD+'/image/upload');
+  xhr.upload.onprogress=function(e){if(e.lengthComputable)fill.style.width=(e.loaded/e.total*100)+'%';};
+  xhr.onload=function(){
+    bar.style.display='none';fill.style.width='0%';
+    if(xhr.status!==200){alert('Upload failed: '+xhr.responseText);return;}
+    var url=JSON.parse(xhr.responseText).secure_url;
+    if(mode==='onb'){
+      db.collection('onb_emails').doc(id).set({mockupUrl:url},{merge:true}).then(function(){
+        showToast('✓ Mockup uploaded');
+        if(!onbEmailData[id])onbEmailData[id]={};
+        onbEmailData[id].mockupUrl=url;
+        renderOnboarding();
+        openMockup(id,id,mode);
+      }).catch(function(e){alert('Uploaded but could not save URL: '+e.message);});
+    } else {
+      db.collection('touches').doc(id).update({mockupUrl:url}).then(function(){
+        showToast('✓ Mockup uploaded');
+        var t=allTouches.find(function(x){return x.id===id;});
+        if(t)t.mockupUrl=url;
+        openMockup(id,t?('T'+t._num+': '+t.title.substring(0,40)):'Email preview','touch');
+      }).catch(function(e){alert('Uploaded but could not save URL: '+e.message);});
     }
-  );
+  };
+  xhr.onerror=function(){bar.style.display='none';alert('Upload failed — network error. Check your connection.');};
+  xhr.send(fd);
 }
 
 /* ─── Post-activation onboarding ─── */
