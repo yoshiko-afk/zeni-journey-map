@@ -322,6 +322,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#0
 .preview-btn.live{color:#22c55e!important;opacity:1!important}
 .preview-btn.has-mockup{color:#a78bfa;opacity:1!important}
 /* Mockup toolbar extras */
+#mockup-replace-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);font-size:11px;font-weight:600;color:#e2e8f0;cursor:pointer;transition:background .12s;flex-shrink:0}
+#mockup-replace-btn:hover{background:rgba(255,255,255,.18)}
 #mockup-del-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);font-size:11px;font-weight:600;color:#fca5a5;cursor:pointer;transition:background .12s;flex-shrink:0}
 #mockup-del-btn:hover{background:rgba(239,68,68,.25);color:#fca5a5}
 #mockup-live-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);font-size:11px;font-weight:600;color:#cbd5e1;cursor:pointer;transition:all .12s;flex-shrink:0}
@@ -472,6 +474,7 @@ body.view-only .oe-acts .onb-upload-btn{display:none!important}
     <div id="mockup-modal-title">Email preview</div>
     <button id="mockup-live-btn" onclick="toggleMockupLive()">○ Draft</button>
     <button id="mockup-cmt-btn" onclick="openMockupComments()">💬 Comments</button>
+    <label id="mockup-replace-btn" for="mockup-file-input" onmousedown="setMockupReplaceTarget()">↑ Replace</label>
     <button id="mockup-del-btn" onclick="deleteMockup()">🗑 Remove</button>
     <button id="mockup-modal-close" onclick="closeMockup()">✕</button>
   </div>
@@ -1098,7 +1101,7 @@ function renderTouchRow(t){
     +'<div class="em-row-acts">'
     +(getMockupUrl(t)
       ?'<button class="preview-btn has-mockup'+(t.live?' live':'')+'" data-id="'+t.id+'" data-title="'+escHtml('T'+t._num+': '+t.title.substring(0,40))+'" title="'+(t.live?'● Live':'○ Draft')+' — View mockup">'+eyeSvg()+'</button>'
-      :'<button class="upload-btn" data-id="'+t.id+'" title="Upload email mockup">📎</button>')
+      :'<label class="upload-btn" for="mockup-file-input" data-id="'+t.id+'" title="Upload email mockup">📎</label>')
     +'<button class="cmt-btn" id="cind-touch-'+t.id+'" data-id="'+t.id+'" data-title="'+escHtml('T'+t._num+': '+t.title.substring(0,40))+'" title="Comments">💬</button>'
     +'<button class="del-btn" data-id="'+t.id+'" title="Remove touch">🗑</button>'
     +'</div>'
@@ -1110,15 +1113,21 @@ function renderTouchRow(t){
 function attachRowButtons(){
   var container=document.getElementById('weeks-container');
   if(!container)return;
-  /* Remove old listener to avoid duplicates on re-render */
+  /* Remove old listeners to avoid duplicates on re-render */
   if(container._rowBtnListener)container.removeEventListener('click',container._rowBtnListener);
+  if(container._rowMdListener)container.removeEventListener('mousedown',container._rowMdListener);
+  /* Mousedown: capture upload target BEFORE the label opens the file picker */
+  container._rowMdListener=function(e){
+    var lbl=e.target.closest('label.upload-btn');
+    if(lbl){_uploadTargetId=lbl.dataset.id;_uploadMode='touch';}
+  };
+  container.addEventListener('mousedown',container._rowMdListener);
   container._rowBtnListener=function(e){
     var btn=e.target.closest('button');
     if(!btn)return;
     var id=btn.dataset.id;
     var title=btn.dataset.title||'';
     if(btn.classList.contains('preview-btn')){openMockup(id,title);}
-    else if(btn.classList.contains('upload-btn')){triggerMockupUpload(id);}
     else if(btn.classList.contains('cmt-btn')){openCmt('touch-'+id,title);}
     else if(btn.classList.contains('del-btn')){deleteTouch(id);}
   };
@@ -1516,9 +1525,16 @@ function openMockupComments(){
 function triggerMockupUpload(id,mode){
   _uploadTargetId=id;
   _uploadMode=mode||'touch';
+  /* Reset value so onChange fires even if same file is re-selected */
   var inp=document.getElementById('mockup-file-input');
-  inp.value='';
-  inp.click();
+  if(inp)inp.value='';
+}
+function setMockupReplaceTarget(){
+  /* Called onmousedown from the Replace label in the lightbox toolbar */
+  _uploadTargetId=_mockupTouchId;
+  _uploadMode=_mockupMode;
+  var inp=document.getElementById('mockup-file-input');
+  if(inp)inp.value='';
 }
 
 function handleMockupUpload(inp){
@@ -1588,7 +1604,7 @@ function renderOnboarding(){
       var isLive=!!d.live;
       var eyeBtn=hasUrl
         ?'<button class="onb-preview-btn has-mockup'+(isLive?' live':'')+'" data-onb-id="'+onbId+'" title="'+(isLive?'● Live':'○ Draft')+' — View mockup">'+eyeSvg()+'</button>'
-        :'<button class="onb-upload-btn" data-onb-id="'+onbId+'" title="Upload email mockup">📎</button>';
+        :'<label class="onb-upload-btn" for="mockup-file-input" data-onb-id="'+onbId+'" title="Upload email mockup">📎</label>';
       html+='<div class="oe">'
         +'<span class="oe-text">'+escHtml(email)+'</span>'
         +'<div class="oe-acts">'
@@ -1607,16 +1623,20 @@ function attachOnbButtons(){
   var container=document.getElementById('onb-container');
   if(!container)return;
   if(container._onbListener)container.removeEventListener('click',container._onbListener);
+  if(container._onbMdListener)container.removeEventListener('mousedown',container._onbMdListener);
+  /* Mousedown: capture upload target before the label opens the file picker */
+  container._onbMdListener=function(e){
+    var lbl=e.target.closest('label.onb-upload-btn');
+    if(lbl){_uploadTargetId=lbl.dataset.onbId;_uploadMode='onb';}
+  };
+  container.addEventListener('mousedown',container._onbMdListener);
   container._onbListener=function(e){
     var btn=e.target.closest('button');
     if(!btn)return;
     var onbId=btn.dataset.onbId;
     if(!onbId)return;
-    var d=onbEmailData[onbId]||{};
     if(btn.classList.contains('onb-preview-btn')){
       openMockup(onbId,btn.dataset.title||onbId,'onb');
-    } else if(btn.classList.contains('onb-upload-btn')){
-      triggerMockupUpload(onbId,'onb');
     } else if(btn.classList.contains('onb-cmt-btn')){
       openCmt('onb-'+onbId,btn.dataset.title||onbId);
     }
