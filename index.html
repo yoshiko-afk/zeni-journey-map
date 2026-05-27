@@ -481,7 +481,7 @@ body.view-only .oe-acts .onb-upload-btn{display:none!important}
   </div>
 </div>
 <!-- hidden file input for mockup uploads -->
-<input type="file" id="mockup-file-input" accept="image/*" style="display:none" onchange="handleMockupUpload(this)"
+<input type="file" id="mockup-file-input" accept="image/*" style="display:none" onchange="handleMockupUpload(this)">
 
 <!-- ALLOWLIST MODAL -->
 <div id="al-modal">
@@ -1549,16 +1549,16 @@ function handleMockupUpload(inp){
             onbEmailData[id].mockupUrl=url;
             renderOnboarding();
             openMockup(id,id,mode);
-          });
+          }).catch(function(e){alert('Saved to storage but could not update record: '+e.message);});
         } else {
           db.collection('touches').doc(id).update({mockupUrl:url}).then(function(){
             showToast('✓ Mockup uploaded');
             var t=allTouches.find(function(x){return x.id===id;});
             if(t)t.mockupUrl=url;
             openMockup(id,t?('T'+t._num+': '+t.title.substring(0,40)):'Email preview','touch');
-          });
+          }).catch(function(e){alert('Saved to storage but could not update record: '+e.message);});
         }
-      });
+      }).catch(function(e){bar.style.display='none';alert('Upload failed — could not get file URL: '+e.message);});
     }
   );
 }
