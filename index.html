@@ -701,7 +701,11 @@ function setReadOnly(ro){
   if(manage)manage.style.display=_isEditor?'flex':'none';
 }
 
+var HARDCODED_EDITORS=['yoshikoaraki5@gmail.com'];
 function checkAllowlist(email){
+  if(HARDCODED_EDITORS.some(function(e){return e.toLowerCase()===email.toLowerCase();})){
+    setReadOnly(false);return;
+  }
   if(!db){setReadOnly(false);return;}
   db.collection('config').doc('allowlist').get().then(function(doc){
     _allowlistEmails=doc.exists?(doc.data().emails||[]):[];
